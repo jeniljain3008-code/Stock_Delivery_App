@@ -7,6 +7,8 @@ export type ApiResult<T> = {
 
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
+export async function apiGet<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { next: { revalidate: 30 } });
   if (!res.ok) throw new Error(`API request failed: ${res.status}`);
   return res.json();
 }
