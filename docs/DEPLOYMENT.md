@@ -83,6 +83,7 @@ The frontend is a Next.js app inside `frontend/` and includes `frontend/vercel.j
 | Variable | Value |
 | --- | --- |
 | `NEXT_PUBLIC_API_BASE_URL` | Render backend URL, for example `https://your-render-service.onrender.com` |
+| `NEXT_TELEMETRY_DISABLED` | `1` |
 | `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase web API key, if Firebase Auth is enabled |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase auth domain, if Firebase Auth is enabled |
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase project ID, if Firebase Auth is enabled |
@@ -115,6 +116,10 @@ curl -I https://your-frontend.vercel.app
 ```
 
 Then open the frontend URL in a browser and verify the dashboard loads.
+
+## Disable Next.js telemetry
+
+The frontend explicitly sets `NEXT_TELEMETRY_DISABLED=1` in `frontend/package.json`, `frontend/vercel.json`, the frontend Docker image, Docker Compose, and `.env.example`. This suppresses the anonymous Next.js telemetry notice during Vercel and local builds.
 
 ## Deployment URL checklist
 
