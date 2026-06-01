@@ -1,2 +1,64 @@
-import { apiGet } from "@/lib/api";
-export default async function GoldStocksPage() { const rows = await apiGet<any[]>("/api/v1/scanners/gold-stocks"); return <div className="space-y-6"><h2 className="text-3xl font-bold">Gold Stocks Scanner</h2><p className="text-slate-400">Current delivery &gt; 2x 1M average, &gt; 1.5x 3M average, above 20/50 DMA, and volume above average.</p><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{rows.map((row) => <article key={row.symbol} className="rounded-2xl border border-amber-400/30 bg-card p-5"><div className="flex items-center justify-between"><h3 className="text-2xl font-bold text-amber-300">{row.symbol}</h3><span>{row.risk_rating} Risk</span></div><p className="mt-4 text-4xl font-bold">₹{row.price}</p><div className="mt-4 grid grid-cols-3 gap-3 text-sm"><span>Surge<br/><b>{row.delivery_surge}x</b></span><span>Score<br/><b>{row.accumulation_score}</b></span><span>Upside<br/><b>{row.potential_upside}%</b></span></div></article>)}</div></div>; }
+import { ApiErrorNotice } from "@/components/api-error";
+import { apiGetOrFallback } from "@/lib/api";
+
+export const dynamic = "force-dynamic";
+
+type GoldStockRow = {
+  symbol: string;
+  price: number;
+  delivery_surge: number;
+  accumulation_score: number;
+  risk_rating: string;
+  potential_upside: number;
+};
+
+export default async function GoldStocksPage() {
+  const { data: rows, error } = await apiGetOrFallback<GoldStockRow[]>(
+    "/api/v1/scanners/gold-stocks",
+    [],
+  );
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold">Gold Stocks Scanner</h2>
+      <p className="text-slate-400">
+        Current delivery &gt; 2x 1M average, &gt; 1.5x 3M average, above 20/50 DMA, and volume above average.
+      </p>
+      <ApiErrorNotice message={error} />
+      {rows.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card p-5 text-slate-400">
+          No Gold Stock candidates are available yet. Upload delivery data or retry after the backend is online.
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {rows.map((row) => (
+            <article key={row.symbol} className="rounded-2xl border border-amber-400/30 bg-card p-5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-amber-300">{row.symbol}</h3>
+                <span>{row.risk_rating} Risk</span>
+              </div>
+              <p className="mt-4 text-4xl font-bold">₹{row.price}</p>
+              <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+                <span>
+                  Surge
+                  <br />
+                  <b>{row.delivery_surge}x</b>
+                </span>
+                <span>
+                  Score
+                  <br />
+                  <b>{row.accumulation_score}</b>
+                </span>
+                <span>
+                  Upside
+                  <br />
+                  <b>{row.potential_upside}%</b>
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
