@@ -9,4 +9,4 @@ COPY analytics /app/analytics
 COPY ingestion /app/ingestion
 COPY reports /app/reports
 COPY ai_engine /app/ai_engine
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

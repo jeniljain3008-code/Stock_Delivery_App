@@ -115,6 +115,17 @@ The Gold Stocks scanner highlights stocks with current delivery quantity above 2
 - `POST /api/v1/ai/ask`
 - `GET /api/v1/reports/gold-stocks.xlsx`
 
+
+## Vercel + Render + Supabase Deployment
+
+This repository includes deployment configuration for Vercel, Render, and Supabase:
+
+- `frontend/vercel.json` configures the Next.js frontend for Vercel when the Vercel project root is set to `frontend`.
+- `render.yaml` configures the FastAPI backend as a Render Docker web service.
+- `supabase/migrations/20260601000000_initial_schema.sql` mirrors the PostgreSQL schema for Supabase.
+
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the step-by-step production deployment and URL checklist.
+
 ## GCP Deployment Notes
 
 1. Build frontend and backend containers with Cloud Build.
