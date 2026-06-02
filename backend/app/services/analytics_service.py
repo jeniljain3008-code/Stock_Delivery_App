@@ -7,8 +7,15 @@ from analytics.sector_rotation import compute_sector_rotation
 
 
 class AnalyticsService:
-    def __init__(self) -> None:
-        self.demo_df = pd.read_csv("sample_data/nse_delivery_sample.csv", parse_dates=["Date"])
+    class AnalyticsService:
+    def __init__(self):
+        try:
+            self.demo_df = pd.read_csv(
+                "sample_data/nse_delivery_sample.csv",
+                parse_dates=["Date"]
+            )
+        except FileNotFoundError:
+            self.demo_df = pd.DataFrame()
 
     def dashboard(self) -> dict:
         analytics = compute_delivery_analytics(self.demo_df)
