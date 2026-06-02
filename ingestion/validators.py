@@ -46,11 +46,17 @@ def validate_delivery_frame(df: pd.DataFrame) -> pd.DataFrame:
             clean[col],
             errors="coerce"
         )
+    print("NULL COUNT BY COLUMN")
+    print(clean.isna().sum())
+    
     bad_rows = clean[clean.isna().any(axis=1)]
-
+    
     if len(bad_rows) > 0:
         print(f"Dropping {len(bad_rows)} invalid rows")
-
+    
+        print("FIRST 20 BAD ROWS")
+        print(bad_rows.head(20))
+    
     clean = clean.dropna()
     
     if (clean[["Open", "High", "Low", "Close", "Volume", "DeliveryQty"]] < 0).any().any():
