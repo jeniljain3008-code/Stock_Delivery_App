@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root { --background: 220 20% 97%; --foreground: 222 47% 11%; --card: 0 0% 100%; --border: 214 32% 91%; --primary: 142 72% 29%; }
+.dark { --background: 222 47% 7%; --foreground: 213 31% 91%; --card: 222 47% 10%; --border: 217 33% 18%; --primary: 142 70% 45%; }
+body { @apply bg-background text-foreground; }
