@@ -7,7 +7,7 @@ from analytics.sector_rotation import compute_sector_rotation
 
 
 class AnalyticsService:
-    class AnalyticsService:
+    
     def __init__(self):
         try:
            self.demo_df = pd.DataFrame()
