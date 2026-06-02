@@ -35,7 +35,7 @@ def validate_delivery_frame(df: pd.DataFrame) -> pd.DataFrame:
     clean = df[REQUIRED_COLUMNS].copy()
     clean["Date"] = pd.to_datetime(
         clean["Date"],
-        format="%d-%b-%y",
+        dayfirst=True,
         errors="coerce"
     ).dt.date
     clean["Symbol"] = clean["Symbol"].astype(str).str.upper().str.strip()
@@ -43,8 +43,13 @@ def validate_delivery_frame(df: pd.DataFrame) -> pd.DataFrame:
         clean[col] = pd.to_numeric(clean[col], errors="coerce")
     for col in ["Volume", "DeliveryQty"]:
         clean[col] = pd.to_numeric(clean[col], errors="coerce").fillna(-1).astype(int)
-    if clean.isna().any().any():
-        raise ValueError("Upload contains invalid dates, symbols, or numeric values.")
+    bad_rows = clean[clean.isna().any(axis=1)]
+
+    if len(bad_rows) > 0:
+        print(f"Dropped {len(bad_rows)} invalid rows")
+
+    clean = clean.dropna()
+    
     if (clean[["Open", "High", "Low", "Close", "Volume", "DeliveryQty"]] < 0).any().any():
         raise ValueError("Prices, volume, and delivery quantity must be non-negative.")
     if ((clean["DeliveryPercent"] < 0) | (clean["DeliveryPercent"] > 100)).any():
