@@ -7,29 +7,22 @@ from analytics.sector_rotation import compute_sector_rotation
 
 
 class AnalyticsService:
-    
+
     def __init__(self):
-        try:
-            self.demo_df = pd.read_csv(
-                "sample_data/nse_delivery_sample.csv",
-                parse_dates=["Date"]
-            )
-
-        except Exception:
-            self.demo_df = pd.DataFrame(
-                columns=[
-                    "Date",
-                    "Symbol",
-                    "Open",
-                    "High",
-                    "Low",
-                    "Close",
-                    "Volume",
-                    "DeliveryQty",
-                    "DeliveryPercent",
-                ]
-            )
-
+        self.demo_df = pd.DataFrame(
+            columns=[
+                "Date",
+                "Symbol",
+                "Open",
+                "High",
+                "Low",
+                "Close",
+                "Volume",
+                "DeliveryQty",
+                "DeliveryPercent",
+            ]
+        )    
+    
     def dashboard(self) -> dict:
         if self.demo_df.empty:
             return {
