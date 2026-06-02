@@ -42,11 +42,14 @@ def validate_delivery_frame(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["Open", "High", "Low", "Close", "DeliveryPercent"]:
         clean[col] = pd.to_numeric(clean[col], errors="coerce")
     for col in ["Volume", "DeliveryQty"]:
-        clean[col] = pd.to_numeric(clean[col], errors="coerce").fillna(-1).astype(int)
+        clean[col] = pd.to_numeric(
+            clean[col],
+            errors="coerce"
+        )
     bad_rows = clean[clean.isna().any(axis=1)]
 
     if len(bad_rows) > 0:
-        print(f"Dropped {len(bad_rows)} invalid rows")
+        print(f"Dropping {len(bad_rows)} invalid rows")
 
     clean = clean.dropna()
     
