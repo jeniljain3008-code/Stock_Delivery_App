@@ -40,8 +40,26 @@ def validate_delivery_frame(df: pd.DataFrame) -> pd.DataFrame:
     ).dt.date
     clean["Symbol"] = clean["Symbol"].astype(str).str.upper().str.strip()
     for col in ["Open", "High", "Low", "Close", "DeliveryPercent"]:
-        clean[col] = pd.to_numeric(clean[col], errors="coerce")
+        clean[col] = (
+            clean[col]
+            .astype(str)
+            .str.strip()
+            .str.replace(",", "", regex=False)
+        )
+    
+        clean[col] = pd.to_numeric(
+            clean[col],
+            errors="coerce"
+        )
+        
     for col in ["Volume", "DeliveryQty"]:
+        clean[col] = (
+            clean[col]
+            .astype(str)
+            .str.strip()
+            .str.replace(",", "", regex=False)
+        )
+    
         clean[col] = pd.to_numeric(
             clean[col],
             errors="coerce"
