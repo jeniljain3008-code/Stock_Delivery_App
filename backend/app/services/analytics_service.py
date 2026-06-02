@@ -10,11 +10,35 @@ class AnalyticsService:
     
     def __init__(self):
         try:
-           self.demo_df = pd.DataFrame()
-        except FileNotFoundError:
-            self.demo_df = pd.DataFrame()
+            self.demo_df = pd.read_csv(
+                "sample_data/nse_delivery_sample.csv",
+                parse_dates=["Date"]
+            )
+
+        except Exception:
+            self.demo_df = pd.DataFrame(
+                columns=[
+                    "Date",
+                    "Symbol",
+                    "Open",
+                    "High",
+                    "Low",
+                    "Close",
+                    "Volume",
+                    "DeliveryQty",
+                    "DeliveryPercent",
+                ]
+            )
 
     def dashboard(self) -> dict:
+        if self.demo_df.empty:
+            return {
+                    "kpis": [],
+                    "top_delivery_surge": [],
+                    "top_breakouts": [],
+                    "sector_leaders": [],
+                    "market_summary": "No data uploaded yet."
+                }
         analytics = compute_delivery_analytics(self.demo_df)
         latest = analytics.sort_values("Date").groupby("Symbol").tail(1)
         accumulation = latest[latest["AccumulationScore"] >= 70]
