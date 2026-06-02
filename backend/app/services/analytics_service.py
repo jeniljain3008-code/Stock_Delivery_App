@@ -10,10 +10,7 @@ class AnalyticsService:
     class AnalyticsService:
     def __init__(self):
         try:
-            self.demo_df = pd.read_csv(
-                "sample_data/nse_delivery_sample.csv",
-                parse_dates=["Date"]
-            )
+           self.demo_df = pd.DataFrame()
         except FileNotFoundError:
             self.demo_df = pd.DataFrame()
 
