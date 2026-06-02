@@ -2,6 +2,7 @@ import logging
 from tempfile import SpooledTemporaryFile
 
 from fastapi import UploadFile
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from backend.app.repositories.stocks import StockRepository
@@ -21,9 +22,14 @@ class UploadService:
             tmp.write(await file.read())
             tmp.seek(0)
             df = parse_delivery_file(tmp, suffix=suffix)
-        for row in df.to_dict(orient="records"):
-            stock = self.repo.get_or_create(row["Symbol"])
-            self.repo.upsert_price(stock, row)
-        self.db.commit()
+        try:
+            for row in df.to_dict(orient="records"):
+                stock = self.repo.get_or_create(row["Symbol"])
+                self.repo.upsert_price(stock, row)
+            self.db.commit()
+        except SQLAlchemyError:
+            self.db.rollback()
+            logger.exception("Failed to persist uploaded delivery data from %s", file.filename)
+            raise
         logger.info("Loaded %s delivery rows from %s", len(df), file.filename)
         return {"status": "accepted", "rows_loaded": len(df), "file_name": file.filename}

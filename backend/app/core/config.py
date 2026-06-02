@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     ai_provider: str = "deterministic"
     openai_api_key: str | None = None
     cors_origins: list[str] = ["http://localhost:3000"]
+    database_connect_timeout: int = 10
+    database_pool_recycle_seconds: int = 1800
+    database_sslmode: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

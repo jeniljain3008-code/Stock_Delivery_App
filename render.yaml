@@ -10,6 +10,12 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
+      - key: DATABASE_CONNECT_TIMEOUT
+        value: "10"
+      - key: DATABASE_POOL_RECYCLE_SECONDS
+        value: "1800"
+      - key: DATABASE_SSLMODE
+        sync: false
       - key: CORS_ORIGINS
         sync: false
       - key: FIREBASE_PROJECT_ID

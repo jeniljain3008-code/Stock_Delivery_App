@@ -14,8 +14,9 @@ This guide connects the imported GitHub repository to:
 
 1. Open Supabase and select your project.
 2. Go to **Project Settings → Database**.
-3. Copy the **Connection string** for the pooler or direct connection.
-4. Convert the connection protocol for SQLAlchemy/psycopg if needed:
+3. Copy the **Session Pooler** or **Transaction Pooler** connection string, not the Direct Connection string.
+4. The pooler URL is required for Render deployments because Supabase direct database hosts can resolve to IPv6 addresses, while some Render networking environments only have outbound IPv4. If you use a Direct Connection URL and see `Network is unreachable` for an IPv6 address, replace `DATABASE_URL` with the Supabase pooler connection string.
+5. Convert the connection protocol for SQLAlchemy/psycopg if needed:
    - Supabase usually shows `postgresql://...`.
    - The backend accepts that format and normalizes it to `postgresql+psycopg://...` automatically.
 
@@ -51,7 +52,10 @@ The root `render.yaml` defines a Docker web service named `smart-delivery-analyt
 
 | Variable | Value |
 | --- | --- |
-| `DATABASE_URL` | Supabase PostgreSQL connection string |
+| `DATABASE_URL` | Supabase **Session Pooler** or **Transaction Pooler** PostgreSQL connection string, not Direct Connection |
+| `DATABASE_CONNECT_TIMEOUT` | `10` |
+| `DATABASE_POOL_RECYCLE_SECONDS` | `1800` |
+| `DATABASE_SSLMODE` | Optional; use `require` if your hosted PostgreSQL URL requires TLS and does not already include SSL settings |
 | `CORS_ORIGINS` | JSON list with your Vercel URL, for example `["https://your-frontend.vercel.app"]` |
 | `FIREBASE_PROJECT_ID` | Firebase project ID, if Firebase Auth is enabled |
 | `FIREBASE_CREDENTIALS_JSON` | Firebase service account JSON string, if Firebase Auth is enabled |
@@ -69,6 +73,10 @@ Expected response:
 ```json
 {"status":"ok"}
 ```
+
+## Supabase connection troubleshooting
+
+If Render logs show an error like `connection to server at "...IPv6...", port 5432 failed: Network is unreachable`, the backend is healthy but Render cannot reach the Supabase Direct Connection host over IPv6. Fix it by updating Render's `DATABASE_URL` to the Supabase **Session Pooler** or **Transaction Pooler** connection string, then redeploy. The API now returns a clear `503` JSON response for database connectivity failures instead of an unhandled ASGI traceback.
 
 ## 3. Deploy frontend to Vercel
 
