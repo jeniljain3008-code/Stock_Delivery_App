@@ -38,12 +38,7 @@ app.add_middleware(
 app.include_router(router)
 @app.on_event("startup")
 def startup():
-    logger.warning("STARTUP EVENT EXECUTED")
-    logger.warning(f"Tables before create: {list(Base.metadata.tables.keys())}")
-
     Base.metadata.create_all(bind=engine)
-
-    logger.warning("TABLE CREATION FINISHED")
 
 @app.exception_handler(ValueError)
 async def value_error_handler(_: Request, exc: ValueError):
