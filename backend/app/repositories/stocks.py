@@ -10,12 +10,26 @@ class StockRepository:
 
     def get_or_create(self, symbol: str) -> Stock:
         normalized = symbol.upper().strip()
-        stock = self.db.scalar(select(Stock).where(Stock.symbol == normalized))
+    
+        print(f"LOOKING UP SYMBOL = {normalized}")
+    
+        stock = self.db.scalar(
+            select(Stock).where(
+                Stock.symbol == normalized
+            )
+        )
+    
         if stock:
             return stock
+    
+        print(f"CREATING SYMBOL = {normalized}")
+    
         stock = Stock(symbol=normalized)
+    
         self.db.add(stock)
+    
         self.db.flush()
+    
         return stock
 
     def list_symbols(self) -> list[str]:
