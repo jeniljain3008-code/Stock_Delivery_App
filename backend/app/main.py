@@ -10,6 +10,9 @@ from backend.app.core.config import get_settings
 from backend.app.core.errors import database_unavailable_detail
 from backend.app.core.logging import configure_logging
 
+from backend.app.db.session import Base, engine
+from backend.app.db import models
+
 configure_logging()
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -28,7 +31,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(router)
-
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
 @app.exception_handler(ValueError)
 async def value_error_handler(_: Request, exc: ValueError):
