@@ -11,7 +11,12 @@ from backend.app.core.errors import database_unavailable_detail
 from backend.app.core.logging import configure_logging
 
 from backend.app.db.session import Base, engine
-from backend.app.db import models
+from backend.app.db.models import (
+    Sector,
+    Stock,
+    StockPrice,
+    AnalyticsSnapshot,
+)
 
 configure_logging()
 settings = get_settings()
