@@ -19,7 +19,10 @@ def parse_delivery_file(file_obj: BinaryIO, suffix: str) -> pd.DataFrame:
     if suffix in {"xlsx", "xls"}:
         df = pd.read_excel(file_obj)
     elif suffix == "csv":
-        df = pd.read_csv(file_obj)
+        df = pd.read_csv(
+            file_obj,
+            thousands=","
+        )
     else:
         raise ValueError("Unsupported file type. Upload CSV or Excel.")
     return validate_delivery_frame(df)
@@ -30,7 +33,11 @@ def validate_delivery_frame(df: pd.DataFrame) -> pd.DataFrame:
     if missing:
         raise ValueError(f"Missing required columns: {', '.join(missing)}")
     clean = df[REQUIRED_COLUMNS].copy()
-    clean["Date"] = pd.to_datetime(clean["Date"], errors="coerce").dt.date
+    clean["Date"] = pd.to_datetime(
+        clean["Date"],
+        format="%d-%b-%y",
+        errors="coerce"
+    ).dt.date
     clean["Symbol"] = clean["Symbol"].astype(str).str.upper().str.strip()
     for col in ["Open", "High", "Low", "Close", "DeliveryPercent"]:
         clean[col] = pd.to_numeric(clean[col], errors="coerce")
