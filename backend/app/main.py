@@ -38,7 +38,9 @@ app.add_middleware(
 app.include_router(router)
 @app.on_event("startup")
 def startup():
+    print("Creating tables...")
     Base.metadata.create_all(bind=engine)
+    print("Tables created successfully")
 
 @app.exception_handler(ValueError)
 async def value_error_handler(_: Request, exc: ValueError):
