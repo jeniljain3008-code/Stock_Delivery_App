@@ -2,6 +2,13 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+class NSEFetchRequest(BaseModel):
+    trade_date: str
+
+class NSEFetchResponse(BaseModel):
+    status: str
+    rows: int
+    data: list[dict]
 
 class KPI(BaseModel):
     label: str
