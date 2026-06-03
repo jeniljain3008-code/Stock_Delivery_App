@@ -10,12 +10,10 @@ from backend.app.schemas import AIAnswer, AIQuestion, BacktestRequest, Dashboard
 from backend.app.services.analytics_service import AnalyticsService
 from backend.app.services.upload_service import UploadService
 from reports.report_service import build_gold_stocks_excel
-from backend.app.schemas import NSEFetchRequest
 from backend.app.services.nse_service import NSEService
-from backend.app.schemas import (
-    NSEFetchRequest,
-    NSELoadRequest,
-)
+from backend.app.schemas import NSEFetchRequest
+from fastapi.responses import StreamingResponse
+from io import StringIO
 
 router = APIRouter(prefix="/api/v1", dependencies=[Depends(get_current_user)])
 UploadFileDependency = Annotated[UploadFile, File(...)]
@@ -38,14 +36,31 @@ async def fetch_nse_delivery_data(
             orient="records"
         ),
     }
-
-@router.post("/nse/load")
-async def load_nse_delivery_data(
-    request: NSELoadRequest,
+@router.get("/nse/download")
+async def download_nse_delivery_data(
+    trade_date: str,
 ):
 
-    return await NSEService().load_to_database(
-        request.trade_date
+    df = await NSEService().fetch_delivery_data(
+        trade_date
+    )
+
+    csv_buffer = StringIO()
+
+    df.to_csv(
+        csv_buffer,
+        index=False,
+    )
+
+    csv_buffer.seek(0)
+
+    return StreamingResponse(
+        iter([csv_buffer.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition":
+            f"attachment; filename=nse_delivery_{trade_date}.csv"
+        },
     )
 @router.post("/uploads/delivery-data")
 async def upload_delivery_data(file: UploadFileDependency, db: DatabaseDependency):
