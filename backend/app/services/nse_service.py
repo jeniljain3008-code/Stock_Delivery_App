@@ -1,4 +1,6 @@
 from io import StringIO
+from backend.app.db.session import SessionLocal
+from backend.app.repositories.stocks import StockRepository
 
 import httpx
 import pandas as pd
@@ -104,3 +106,53 @@ class NSEService:
         out = out.dropna()
 
         return out
+
+     async def load_to_database(
+            self,
+            trade_date: str,
+        ) -> dict:
+
+    df = await self.fetch_delivery_data(
+        trade_date
+    )
+
+    db = SessionLocal()
+
+    inserted = 0
+
+    try:
+
+        repo = StockRepository(db)
+
+        for row in df.to_dict(
+            orient="records"
+        ):
+
+            stock = repo.get_or_create(
+                row["Symbol"]
+            )
+
+            repo.upsert_price(
+                stock,
+                row,
+            )
+
+            inserted += 1
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "trade_date": trade_date,
+            "rows_loaded": inserted,
+        }
+
+    except Exception:
+
+        db.rollback()
+
+        raise
+
+    finally:
+
+        db.close()   
