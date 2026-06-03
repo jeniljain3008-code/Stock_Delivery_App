@@ -55,7 +55,37 @@ export async function apiGetOrFallback<T>(
     };
   }
 }
+export async function loadNSEDeliveryData(
+  tradeDate: string
+) {
 
+  const response = await fetch(
+    `${API_BASE}/api/v1/nse/load`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        trade_date: tradeDate,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+
+    const errorText =
+      await response.text();
+
+    throw new Error(
+      errorText ||
+      "Failed to load data"
+    );
+  }
+
+  return response.json();
+}
 export async function uploadDeliveryFile(
   file: File
 ) {
