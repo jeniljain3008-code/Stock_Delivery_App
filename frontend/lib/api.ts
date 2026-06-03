@@ -28,3 +28,28 @@ export async function uploadDeliveryFile(file: File) {
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+export async function fetchNSEDeliveryData(
+  tradeDate: string
+) {
+  const response = await fetch(
+    `${API_URL}/api/v1/nse/fetch`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        trade_date: tradeDate,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Failed to fetch NSE data"
+    );
+  }
+
+  return response.json();
+}
