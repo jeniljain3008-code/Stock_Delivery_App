@@ -5,6 +5,7 @@ import { useState } from "react";
 import {
   uploadDeliveryFile,
   fetchNSEDeliveryData,
+  downloadNSEDeliveryData,
 } from "@/lib/api";
 
 type NSEPreviewRow = {
@@ -38,7 +39,7 @@ export default function UploadPage() {
 
       <p className="text-slate-400">
         Upload CSV/Excel manually or fetch NSE
-        Delivery Data directly from NSE archives.
+        delivery data directly from NSE archives.
       </p>
 
       {/* Manual Upload */}
@@ -54,20 +55,27 @@ export default function UploadPage() {
           type="file"
           accept=".csv,.xlsx,.xls"
           onChange={async (e) => {
-            const file = e.target.files?.[0];
+
+            const file =
+              e.target.files?.[0];
 
             if (!file) return;
 
             setMessage("Uploading...");
 
             try {
+
               const res =
-                await uploadDeliveryFile(file);
+                await uploadDeliveryFile(
+                  file
+                );
 
               setMessage(
                 `Loaded ${res.rows_loaded} rows from ${res.file_name}`
               );
+
             } catch (err) {
+
               setMessage(
                 err instanceof Error
                   ? err.message
@@ -83,12 +91,13 @@ export default function UploadPage() {
       <div className="rounded-3xl border border-border bg-card p-6 space-y-4">
 
         <h3 className="text-xl font-semibold">
-          Fetch NSE Delivery Data
+          NSE Delivery Data
         </h3>
 
         <p className="text-sm text-slate-400">
-          Select a trading date and fetch EQ
-          segment delivery data directly from NSE.
+          Select a trading date and fetch
+          EQ segment delivery data directly
+          from NSE archives.
         </p>
 
         <div className="flex flex-wrap gap-4 items-center">
@@ -97,7 +106,9 @@ export default function UploadPage() {
             type="date"
             value={tradeDate}
             onChange={(e) =>
-              setTradeDate(e.target.value)
+              setTradeDate(
+                e.target.value
+              )
             }
             className="rounded-lg border border-border bg-background px-4 py-2"
           />
@@ -112,7 +123,7 @@ export default function UploadPage() {
                 setLoading(true);
 
                 setMessage(
-                  "Fetching NSE Delivery Data..."
+                  "Fetching NSE data..."
                 );
 
                 const result =
@@ -144,18 +155,51 @@ export default function UploadPage() {
           >
             {loading
               ? "Fetching..."
-              : "Fetch NSE Delivery Data"}
+              : "Fetch NSE Data"}
+          </button>
+
+          <button
+            disabled={!tradeDate}
+            className="rounded-lg bg-green-600 px-4 py-2 text-white disabled:opacity-50"
+            onClick={async () => {
+
+              try {
+
+                await downloadNSEDeliveryData(
+                  tradeDate
+                );
+
+                setMessage(
+                  `CSV downloaded successfully for ${tradeDate}`
+                );
+
+              } catch (err) {
+
+                setMessage(
+                  err instanceof Error
+                    ? err.message
+                    : "Download failed"
+                );
+              }
+            }}
+          >
+            Download CSV
           </button>
 
         </div>
+
       </div>
 
       {/* Status Message */}
 
       {message ? (
+
         <div className="rounded-xl border border-border bg-card p-4">
+
           {message}
+
         </div>
+
       ) : null}
 
       {/* Preview Table */}
@@ -242,6 +286,29 @@ export default function UploadPage() {
 
         </div>
       )}
+
+      {/* Daily Process Instructions */}
+
+      <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6">
+
+        <h3 className="mb-3 text-lg font-semibold">
+          Daily Data Refresh Process
+        </h3>
+
+        <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-300">
+          <li>Select trade date</li>
+          <li>Fetch NSE Data</li>
+          <li>Download CSV</li>
+          <li>Upload CSV into raw_delivery_data table in Supabase</li>
+          <li>Run:
+            <code className="ml-2 rounded bg-slate-800 px-2 py-1">
+              SELECT load_delivery_data();
+            </code>
+          </li>
+          <li>Refresh Dashboard</li>
+        </ol>
+
+      </div>
 
     </div>
   );
