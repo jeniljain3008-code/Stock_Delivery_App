@@ -1,9 +1,10 @@
 from io import StringIO
-from backend.app.db.session import SessionLocal
-from backend.app.repositories.stocks import StockRepository
 
 import httpx
 import pandas as pd
+
+from backend.app.db.session import SessionLocal
+from backend.app.repositories.stocks import StockRepository
 
 
 class NSEService:
@@ -107,52 +108,52 @@ class NSEService:
 
         return out
 
-     async def load_to_database(
-            self,
-            trade_date: str,
-        ) -> dict:
+    async def load_to_database(
+        self,
+        trade_date: str,
+    ) -> dict:
 
-    df = await self.fetch_delivery_data(
-        trade_date
-    )
+        df = await self.fetch_delivery_data(
+            trade_date
+        )
 
-    db = SessionLocal()
+        db = SessionLocal()
 
-    inserted = 0
+        inserted = 0
 
-    try:
+        try:
 
-        repo = StockRepository(db)
+            repo = StockRepository(db)
 
-        for row in df.to_dict(
-            orient="records"
-        ):
+            for row in df.to_dict(
+                orient="records"
+            ):
 
-            stock = repo.get_or_create(
-                row["Symbol"]
-            )
+                stock = repo.get_or_create(
+                    row["Symbol"]
+                )
 
-            repo.upsert_price(
-                stock,
-                row,
-            )
+                repo.upsert_price(
+                    stock,
+                    row,
+                )
 
-            inserted += 1
+                inserted += 1
 
-        db.commit()
+            db.commit()
 
-        return {
-            "status": "success",
-            "trade_date": trade_date,
-            "rows_loaded": inserted,
-        }
+            return {
+                "status": "success",
+                "trade_date": trade_date,
+                "rows_loaded": inserted,
+            }
 
-    except Exception:
+        except Exception:
 
-        db.rollback()
+            db.rollback()
 
-        raise
+            raise
 
-    finally:
+        finally:
 
-        db.close()   
+            db.close()
