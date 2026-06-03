@@ -10,12 +10,30 @@ from backend.app.schemas import AIAnswer, AIQuestion, BacktestRequest, Dashboard
 from backend.app.services.analytics_service import AnalyticsService
 from backend.app.services.upload_service import UploadService
 from reports.report_service import build_gold_stocks_excel
+from backend.app.schemas import NSEFetchRequest
+from backend.app.services.nse_service import NSEService
 
 router = APIRouter(prefix="/api/v1", dependencies=[Depends(get_current_user)])
 UploadFileDependency = Annotated[UploadFile, File(...)]
 DatabaseDependency = Annotated[Session, Depends(get_db)]
 
 
+@router.post("/nse/fetch")
+async def fetch_nse_delivery_data(
+    request: NSEFetchRequest,
+):
+
+    df = await NSEService().fetch_delivery_data(
+        request.trade_date
+    )
+
+    return {
+        "status": "success",
+        "rows": len(df),
+        "data": df.head(100).to_dict(
+            orient="records"
+        ),
+    }
 @router.post("/uploads/delivery-data")
 async def upload_delivery_data(file: UploadFileDependency, db: DatabaseDependency):
     return await UploadService(db).ingest(file)
