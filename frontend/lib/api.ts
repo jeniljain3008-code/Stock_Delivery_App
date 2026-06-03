@@ -109,7 +109,38 @@ export async function uploadDeliveryFile(
 
   return res.json();
 }
+export async function downloadNSEDeliveryData(
+  tradeDate: string
+) {
 
+  const response = await fetch(
+    `${API_BASE}/api/v1/nse/download?trade_date=${tradeDate}`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Failed to download CSV"
+    );
+  }
+
+  const blob =
+    await response.blob();
+
+  const url =
+    window.URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+
+  a.download =
+    `nse_delivery_${tradeDate}.csv`;
+
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+}
 export async function fetchNSEDeliveryData(
   tradeDate: string
 ) {
