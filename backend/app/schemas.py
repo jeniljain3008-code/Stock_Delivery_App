@@ -2,6 +2,9 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+class NSELoadRequest(BaseModel):
+    trade_date: str
+    
 class NSEFetchRequest(BaseModel):
     trade_date: str
 
