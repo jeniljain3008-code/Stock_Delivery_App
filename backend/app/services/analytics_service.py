@@ -82,6 +82,41 @@ class AnalyticsService:
             latest["AccumulationLabel"] == "Distribution"
         ]
 
+        exploded = (
+            latest[
+                latest["ExplosionCategory"]
+                == "EXPLODED"
+            ]
+            .sort_values(
+                "ExplosionScore",
+                ascending=False,
+            )
+            .head(15)
+        )
+
+        ready_to_explode = (
+            latest[
+                latest["ExplosionCategory"]
+                == "READY_TO_EXPLODE"
+            ]
+            .sort_values(
+                "ExplosionScore",
+                ascending=False,
+            )
+            .head(15)
+        )
+
+        preparing_to_explode = (
+            latest[
+                latest["ExplosionCategory"]
+                == "PREPARING_TO_EXPLODE"
+            ]
+            .sort_values(
+                "ExplosionScore",
+                ascending=False,
+            )
+            .head(15)
+        )
         return {
             "kpis": [
                 {
@@ -106,6 +141,18 @@ class AnalyticsService:
                         )
                     ),
                 },
+                {
+                    "label": "Exploded",
+                    "value": int(len(exploded)),
+                },
+                {
+                    "label": "Ready To Explode",
+                    "value": int(len(ready_to_explode)),
+                },
+                {
+                    "label": "Preparing",
+                    "value": int(len(preparing_to_explode)),
+                },
             ],
             "top_delivery_surge": self._rows(
                 latest
@@ -122,6 +169,17 @@ class AnalyticsService:
                     ascending=False,
                 )
                 .head(5)
+            ),
+            "exploded_stocks": self._rows(
+                exploded
+            ),
+
+            "ready_to_explode": self._rows(
+                ready_to_explode
+            ),
+
+            "preparing_to_explode": self._rows(
+                preparing_to_explode
             ),
             "sector_leaders": (
                 compute_sector_rotation(
@@ -276,6 +334,45 @@ class AnalyticsService:
                             row.get(
                                 "Surge1M",
                                 1,
+                            )
+                        ),
+                        2,
+                    ),
+                    "surge_5d": round(
+                        float(
+                            row.get(
+                                "Surge5D",
+                                0,
+                            )
+                        ),
+                        2,
+                    ),
+
+                    "surge_10d": round(
+                        float(
+                            row.get(
+                                "Surge10D",
+                                0,
+                            )
+                        ),
+                        2,
+                    ),
+
+                    "surge_30d": round(
+                        float(
+                            row.get(
+                                "Surge30D",
+                                0,
+                            )
+                        ),
+                        2,
+                    ),
+
+                    "explosion_score": round(
+                        float(
+                            row.get(
+                                "ExplosionScore",
+                                0,
                             )
                         ),
                         2,
