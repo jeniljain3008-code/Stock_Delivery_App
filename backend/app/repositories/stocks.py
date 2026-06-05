@@ -88,7 +88,7 @@ class StockRepository:
             FROM stock_prices sp
             INNER JOIN stocks s
                 ON s.id = sp.stock_id
-            WHERE sp.trade_date >= CURRENT_DATE - INTERVAL '90 days'
+            WHERE sp.trade_date >= CURRENT_DATE - INTERVAL '60 days'
             ORDER BY
                 s.symbol,
                 sp.trade_date
