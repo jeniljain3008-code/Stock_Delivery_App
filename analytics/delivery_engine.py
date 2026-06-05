@@ -37,7 +37,35 @@ def compute_delivery_analytics(raw: pd.DataFrame) -> pd.DataFrame:
     df["Surge2M"] = df["DeliveryQty"] / df["DeliveryMA60"].replace(0, np.nan)
     df["Surge3M"] = df["DeliveryQty"] / df["DeliveryMA90"].replace(0, np.nan)
     df["Surge6M"] = df["DeliveryQty"] / df["DeliveryMA126"].replace(0, np.nan)
+    df["Surge5D"] = (
+            df["DeliveryQty"]
+            / df["DeliveryMA5"].replace(
+                0,
+                np.nan,
+            )
+        )
 
+    df["Surge10D"] = (
+            df["DeliveryQty"]
+            / df["DeliveryMA10"].replace(
+                0,
+                np.nan,
+            )
+        )
+
+    df["Surge30D"] = (
+            df["DeliveryQty"]
+            / df["DeliveryMA30"].replace(
+                0,
+                np.nan,
+            )
+        )
+    
+    df["ExplosionScore"] = (
+            (df["Surge5D"] * 0.50)
+            + (df["Surge10D"] * 0.30)
+            + (df["Surge30D"] * 0.20)
+        )
     df["DMA20"] = groups["Close"].transform(lambda s: s.rolling(20, min_periods=1).mean())
     df["DMA50"] = groups["Close"].transform(lambda s: s.rolling(50, min_periods=1).mean())
     df["DMA200"] = groups["Close"].transform(lambda s: s.rolling(200, min_periods=1).mean())
@@ -68,6 +96,42 @@ def compute_delivery_analytics(raw: pd.DataFrame) -> pd.DataFrame:
         + volume_strength * 0.20
         + trend_strength * 0.20
     )
+
+    df["ExplosionCategory"] = np.select(
+            [
+                (
+                    (df["Surge5D"] > 1.25)
+                    &
+                    (df["Surge10D"] > 1.10)
+                    &
+                    (df["Surge30D"] > 1.00)
+                    &
+                    (df["AccumulationScore"] >= 60)
+                ),
+        
+                (
+                    (df["Surge5D"] > df["Surge10D"])
+                    &
+                    (df["Surge5D"] < df["Surge30D"])
+                    &
+                    (df["AccumulationScore"] >= 60)
+                ),
+        
+                (
+                    (df["Surge5D"] < df["Surge10D"])
+                    &
+                    (df["Surge10D"] > df["Surge30D"])
+                    &
+                    (df["AccumulationScore"] >= 60)
+                ),
+            ],
+            [
+                "EXPLODED",
+                "READY_TO_EXPLODE",
+                "PREPARING_TO_EXPLODE",
+            ],
+            default="OTHER",
+        )    
     df["BreakoutScore"] = _score_clip(
         (df["Close"] / df["High20"].replace(0, np.nan)) * 40
         + (df["Surge1M"] * 20)
