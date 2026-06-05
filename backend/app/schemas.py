@@ -18,26 +18,40 @@ class KPI(BaseModel):
     value: str | int | float
     change: float | None = None
 
-
 class StockRow(BaseModel):
     symbol: str
     close: float
+
     sector: str | None = None
     market_cap: str | None = None
-    delivery_surge: float = Field(description="Current delivery / historical average")
+
+    delivery_surge: float
+
+    surge_5d: float = 0
+    surge_10d: float = 0
+    surge_30d: float = 0
+
+    explosion_score: float = 0
+
     accumulation_score: float
     breakout_score: float
+
     risk_rating: str
     swing_signal: str
-
-
+    
 class DashboardSummary(BaseModel):
     kpis: list[KPI]
+
     top_delivery_surge: list[StockRow]
     top_breakouts: list[StockRow]
-    sector_leaders: list[dict]
-    market_summary: str
 
+    exploded_stocks: list[StockRow]
+    ready_to_explode: list[StockRow]
+    preparing_to_explode: list[StockRow]
+
+    sector_leaders: list[dict]
+
+    market_summary: str
 
 class GoldStock(BaseModel):
     symbol: str
