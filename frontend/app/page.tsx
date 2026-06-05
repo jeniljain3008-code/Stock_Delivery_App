@@ -6,12 +6,21 @@ import { apiGetOrFallback } from "@/lib/api";
 export const dynamic = "force-dynamic";
 
 type DashboardSummary = {
-  kpis: Array<{ label: string; value: string | number; change?: number | null }>;
+  kpis: Array<{
+    label: string;
+    value: string | number;
+    change?: number | null;
+  }>;
+
   top_delivery_surge: StockRow[];
   top_breakouts: StockRow[];
+
+  exploded_stocks: StockRow[];
+  ready_to_explode: StockRow[];
+  preparing_to_explode: StockRow[];
+
   market_summary: string;
 };
-
 const fallbackDashboard: DashboardSummary = {
   kpis: [
     { label: "Total Stocks Analyzed", value: 0 },
@@ -19,9 +28,16 @@ const fallbackDashboard: DashboardSummary = {
     { label: "Stocks in Distribution", value: 0 },
     { label: "Gold Stock Candidates", value: 0 },
   ],
+
   top_delivery_surge: [],
   top_breakouts: [],
-  market_summary: "Backend data is unavailable. Upload data or retry after the API is online.",
+
+  exploded_stocks: [],
+  ready_to_explode: [],
+  preparing_to_explode: [],
+
+  market_summary:
+    "Backend data is unavailable. Upload data or retry after the API is online.",
 };
 
 export default async function Dashboard() {
@@ -56,6 +72,39 @@ export default async function Dashboard() {
           <h3 className="mb-3 text-xl font-semibold">Top Breakout Stocks</h3>
           <StockTable rows={data.top_breakouts} />
         </div>
+      </section>
+      <section className="space-y-8">
+      
+        <div>
+          <h3 className="mb-3 text-xl font-semibold">
+            🚀 Exploded Stocks
+          </h3>
+      
+          <StockTable
+            rows={data.exploded_stocks}
+          />
+        </div>
+      
+        <div>
+          <h3 className="mb-3 text-xl font-semibold">
+            🔥 Ready To Explode
+          </h3>
+      
+          <StockTable
+            rows={data.ready_to_explode}
+          />
+        </div>
+      
+        <div>
+          <h3 className="mb-3 text-xl font-semibold">
+            👀 Preparing To Explode
+          </h3>
+      
+          <StockTable
+            rows={data.preparing_to_explode}
+          />
+        </div>
+      
       </section>
       <section className="rounded-2xl border border-border bg-card p-5">
         <h3 className="text-xl font-semibold">Market Summary</h3>
