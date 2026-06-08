@@ -145,6 +145,18 @@ def winner_vs_loser_study(
     ).winner_vs_loser_study(
         days=days
     )
+
+@router.get(
+    "/backtests/top-decile-study"
+)
+def top_decile_study(
+    days: int = 365,
+):
+
+    return AnalyticsService(
+    ).top_decile_study(
+        days=days
+    )
 @router.post("/ai/ask", response_model=AIAnswer)
 def ask_ai(question: AIQuestion):
     analytics = AnalyticsService()
