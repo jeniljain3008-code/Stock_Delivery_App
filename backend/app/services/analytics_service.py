@@ -435,20 +435,20 @@ class AnalyticsService:
                 days=days,
             )
 
-        print(
-            "Rows fetched:",
-            len(df)
-        )
-
-        print(
-            "Min Date:",
-            df["Date"].min()
-        )
-
-        print(
-            "Max Date:",
-            df["Date"].max()
-        )
+            print(
+                "Rows fetched:",
+                len(df)
+            )
+    
+            print(
+                "Min Date:",
+                df["Date"].min()
+            )
+    
+            print(
+                "Max Date:",
+                df["Date"].max()
+            )
     
         finally:
     
