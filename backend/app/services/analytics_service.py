@@ -5,7 +5,8 @@ import pandas as pd
 from analytics.backtesting import (
     run_backtest,
     run_explosion_backtest,
-    run_pre_explosion_study
+    run_pre_explosion_study,
+    run_pre_explosion_winner_study
 )
 from analytics.delivery_engine import compute_delivery_analytics, scan_gold_stocks
 from analytics.relative_strength import compute_relative_strength
@@ -411,6 +412,29 @@ class AnalyticsService:
             )
 
         return out
+
+    def pre_explosion_winner_study(
+        self,
+        days: int = 365,
+    ) -> dict:
+
+        db = SessionLocal()
+    
+        try:
+    
+            repo = StockRepository(db)
+    
+            df = repo.get_backtest_dataframe(
+                days=days
+            )
+    
+        finally:
+    
+            db.close()
+    
+        return run_pre_explosion_winner_study(
+            df
+        )
     def pre_explosion_study(
         self,
         days: int = 365,
