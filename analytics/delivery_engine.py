@@ -195,3 +195,106 @@ def scan_gold_stocks(raw: pd.DataFrame) -> pd.DataFrame:
             "potential_upside",
         ]
     ].rename(columns={"Symbol": "symbol"})
+
+def scan_exploded_elite(
+    raw: pd.DataFrame,
+) -> pd.DataFrame:
+
+    df = compute_delivery_analytics(
+        raw
+    )
+
+    latest = (
+        df.sort_values(
+            "Date"
+        )
+        .groupby(
+            "Symbol"
+        )
+        .tail(1)
+        .copy()
+    )
+
+    latest["VolumeRatio"] = (
+        latest["Volume"]
+        / latest["VolumeMA20"]
+    )
+
+    elite = latest[
+        (
+            latest[
+                "ExplosionCategory"
+            ]
+            == "EXPLODED"
+        )
+        &
+        (
+            latest[
+                "DeliveryPercent"
+            ]
+            >= 60
+        )
+        &
+        (
+            latest[
+                "Surge30D"
+            ]
+            >= 2.8
+        )
+    ].copy()
+
+    return elite.sort_values(
+        "Surge30D",
+        ascending=False,
+    )
+def scan_exploded_ultra(
+    raw: pd.DataFrame,
+) -> pd.DataFrame:
+
+    df = compute_delivery_analytics(
+        raw
+    )
+
+    latest = (
+        df.sort_values(
+            "Date"
+        )
+        .groupby(
+            "Symbol"
+        )
+        .tail(1)
+        .copy()
+    )
+
+    latest["VolumeRatio"] = (
+        latest["Volume"]
+        / latest["VolumeMA20"]
+    )
+
+    ultra = latest[
+        (
+            latest[
+                "ExplosionCategory"
+            ]
+            == "EXPLODED"
+        )
+        &
+        (
+            latest[
+                "DeliveryPercent"
+            ]
+            >= 60
+        )
+        &
+        (
+            latest[
+                "Surge30D"
+            ]
+            >= 3.2
+        )
+    ].copy()
+
+    return ultra.sort_values(
+        "Surge30D",
+        ascending=False,
+    )
