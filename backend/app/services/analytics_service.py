@@ -410,11 +410,11 @@ class AnalyticsService:
             )
 
         return out
+        
     def explosion_backtest(
-            self,
-            days: int = 365,
+        self,
+        days: int = 365,
     ) -> dict:
-
 
         import gc
 
@@ -423,14 +423,15 @@ class AnalyticsService:
             "demo_df",
         ):
             del self.demo_df
+
         gc.collect()
-        
+
         db = SessionLocal()
-    
+
         try:
-    
+
             repo = StockRepository(db)
-    
+
             df = repo.get_backtest_dataframe(
                 days=days,
             )
@@ -439,28 +440,29 @@ class AnalyticsService:
                 "Rows fetched:",
                 len(df)
             )
-    
+
             print(
                 "Min Date:",
                 df["Date"].min()
             )
-    
+
             print(
                 "Max Date:",
                 df["Date"].max()
             )
-    
+
         finally:
-    
+
             db.close()
-    
+
         if df.empty:
-    
+
             return {
-                "error":
-                "No market data available"
+                "error": "No market data available"
             }
-    
-        return run_explosion_backtest(
-            df
-        )
+
+        return {
+            "rows": len(df),
+            "min_date": str(df["Date"].min()),
+            "max_date": str(df["Date"].max()),
+        }
