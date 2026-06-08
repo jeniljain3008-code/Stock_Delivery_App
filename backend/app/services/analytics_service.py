@@ -565,28 +565,20 @@ class AnalyticsService:
         self,
     ):
 
-        return (
+        return self._rows(
             scan_exploded_elite(
                 self.demo_df
-            )
-            .head(100)
-            .to_dict(
-                orient="records"
-            )
+            ).head(100)
         )
 
     def exploded_ultra(
         self,
     ):
 
-        return (
+        return self._rows(
             scan_exploded_ultra(
                 self.demo_df
-            )
-            .head(100)
-            .to_dict(
-                orient="records"
-            )
+            ).head(100)
         )
     def explosion_backtest(
         self,
