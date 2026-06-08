@@ -39,3 +39,185 @@ def run_backtest(
         "sharpe_ratio": round(float((returns.mean() / (returns.std() or 1)) * np.sqrt(12)), 2),
         "trade_log": trades[:100],
     }
+def run_explosion_backtest(
+    raw: pd.DataFrame,
+    holding_days: int = 20,
+) -> dict:
+
+    analytics = compute_delivery_analytics(raw)
+
+    categories = [
+        "EXPLODED",
+        "READY_TO_EXPLODE",
+        "PREPARING_TO_EXPLODE",
+    ]
+
+    results = {}
+
+    latest_date = analytics["Date"].max()
+
+    for category in categories:
+
+        trades = []
+
+        candidates = analytics[
+            analytics["ExplosionCategory"] == category
+        ].copy()
+
+        candidates = candidates.sort_values(
+            ["Symbol", "Date"]
+        )
+
+        for _, row in candidates.iterrows():
+
+            symbol = row["Symbol"]
+
+            scan_date = row["Date"]
+
+            scanner_high = float(
+                row["High"]
+            )
+
+            stock = analytics[
+                analytics["Symbol"] == symbol
+            ].sort_values(
+                "Date"
+            )
+
+            future = stock[
+                stock["Date"] > scan_date
+            ].copy()
+
+            if future.empty:
+                continue
+
+            breakout = future[
+                future["High"] > scanner_high
+            ]
+
+            if breakout.empty:
+                continue
+
+            breakout_row = breakout.iloc[0]
+
+            entry_date = breakout_row["Date"]
+
+            entry_price = scanner_high
+
+            future_after_entry = stock[
+                stock["Date"] >= entry_date
+            ].reset_index(
+                drop=True
+            )
+
+            if len(future_after_entry) <= holding_days:
+                continue
+
+            exit_row = future_after_entry.iloc[
+                holding_days
+            ]
+
+            exit_price = float(
+                exit_row["Close"]
+            )
+
+            return_pct = (
+                (
+                    exit_price
+                    - entry_price
+                )
+                / entry_price
+            ) * 100
+
+            trades.append(
+                {
+                    "symbol": symbol,
+                    "scan_date": str(
+                        scan_date.date()
+                    ),
+                    "entry_date": str(
+                        entry_date.date()
+                    ),
+                    "entry_price": round(
+                        entry_price,
+                        2,
+                    ),
+                    "exit_price": round(
+                        exit_price,
+                        2,
+                    ),
+                    "return_pct": round(
+                        return_pct,
+                        2,
+                    ),
+                }
+            )
+
+        if len(trades) == 0:
+
+            results[category] = {
+                "signals": 0,
+                "breakouts": 0,
+                "win_rate": 0,
+                "avg_return": 0,
+                "median_return": 0,
+                "max_gain": 0,
+                "max_loss": 0,
+                "trade_log": [],
+            }
+
+            continue
+
+        returns = np.array(
+            [
+                t["return_pct"]
+                for t in trades
+            ]
+        )
+
+        results[category] = {
+            "signals": int(
+                len(candidates)
+            ),
+            "breakouts": int(
+                len(trades)
+            ),
+            "win_rate": round(
+                float(
+                    (
+                        returns > 0
+                    ).mean()
+                    * 100
+                ),
+                2,
+            ),
+            "avg_return": round(
+                float(
+                    returns.mean()
+                ),
+                2,
+            ),
+            "median_return": round(
+                float(
+                    np.median(
+                        returns
+                    )
+                ),
+                2,
+            ),
+            "max_gain": round(
+                float(
+                    returns.max()
+                ),
+                2,
+            ),
+            "max_loss": round(
+                float(
+                    returns.min()
+                ),
+                2,
+            ),
+            "trade_log": trades[:100],
+        }
+
+    return results
