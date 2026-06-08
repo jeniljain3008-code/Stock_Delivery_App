@@ -169,6 +169,18 @@ def filtered_exploded(
     ).filtered_exploded_backtest(
         days=days
     )
+
+@router.get(
+    "/backtests/exploded-filter-optimization"
+)
+def exploded_filter_optimization(
+    days: int = 365,
+):
+
+    return AnalyticsService(
+    ).exploded_filter_optimization(
+        days=days
+    )
 @router.post("/ai/ask", response_model=AIAnswer)
 def ask_ai(question: AIQuestion):
     analytics = AnalyticsService()
