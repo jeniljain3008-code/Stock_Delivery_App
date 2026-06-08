@@ -393,6 +393,230 @@ def run_winner_vs_loser_study(
             loser_stats,
     }
 
+def run_exploded_filter_optimization(
+    raw: pd.DataFrame,
+    lookahead_days: int = 20,
+) -> dict:
+
+    analytics = compute_delivery_analytics(raw)
+
+    analytics["VolumeRatio"] = (
+        analytics["Volume"]
+        / analytics["VolumeMA20"].replace(
+            0,
+            np.nan,
+        )
+    )
+
+    exploded = analytics[
+        analytics["ExplosionCategory"]
+        == "EXPLODED"
+    ].copy()
+
+    exploded = (
+        exploded
+        .sort_values("Date")
+        .groupby("Symbol")
+        .head(1)
+        .copy()
+    )
+
+    stock_lookup = {
+        symbol: group.sort_values(
+            "Date"
+        ).reset_index(
+            drop=True
+        )
+        for symbol, group
+        in analytics.groupby(
+            "Symbol"
+        )
+    }
+
+    test_configs = [
+        {
+            "name": "Current",
+            "delivery": 60,
+            "surge30": 2.4,
+            "volume": 3.0,
+        },
+        {
+            "name": "DP65",
+            "delivery": 65,
+            "surge30": 2.4,
+            "volume": 3.0,
+        },
+        {
+            "name": "DP70",
+            "delivery": 70,
+            "surge30": 2.4,
+            "volume": 3.0,
+        },
+        {
+            "name": "S30_28",
+            "delivery": 60,
+            "surge30": 2.8,
+            "volume": 3.0,
+        },
+        {
+            "name": "S30_32",
+            "delivery": 60,
+            "surge30": 3.2,
+            "volume": 3.0,
+        },
+        {
+            "name": "VOL25",
+            "delivery": 60,
+            "surge30": 2.4,
+            "volume": 2.5,
+        },
+        {
+            "name": "STRICT",
+            "delivery": 65,
+            "surge30": 2.8,
+            "volume": 2.5,
+        },
+    ]
+
+    results = {}
+
+    for config in test_configs:
+
+        candidates = exploded[
+            (
+                exploded["DeliveryPercent"]
+                >= config["delivery"]
+            )
+            &
+            (
+                exploded["Surge30D"]
+                >= config["surge30"]
+            )
+            &
+            (
+                exploded["VolumeRatio"]
+                <= config["volume"]
+            )
+        ]
+
+        returns = []
+
+        for _, row in candidates.iterrows():
+
+            stock = stock_lookup.get(
+                row["Symbol"]
+            )
+
+            if stock is None:
+                continue
+
+            idx_match = stock.index[
+                stock["Date"]
+                == row["Date"]
+            ]
+
+            if len(idx_match) == 0:
+                continue
+
+            idx = idx_match[0]
+
+            if (
+                idx + lookahead_days
+                >= len(stock)
+            ):
+                continue
+
+            entry = float(
+                row["Close"]
+            )
+
+            exit_price = float(
+                stock.iloc[
+                    idx + lookahead_days
+                ]["Close"]
+            )
+
+            ret = (
+                (
+                    exit_price
+                    - entry
+                )
+                / entry
+            ) * 100
+
+            returns.append(ret)
+
+        if len(returns) == 0:
+
+            results[
+                config["name"]
+            ] = {
+                "signals": 0
+            }
+
+            continue
+
+        returns = np.array(
+            returns
+        )
+
+        results[
+            config["name"]
+        ] = {
+            "signals":
+                int(
+                    len(
+                        returns
+                    )
+                ),
+
+            "win_rate":
+                round(
+                    float(
+                        (
+                            returns > 0
+                        ).mean()
+                        * 100
+                    ),
+                    2,
+                ),
+
+            "avg_return":
+                round(
+                    float(
+                        returns.mean()
+                    ),
+                    2,
+                ),
+
+            "median_return":
+                round(
+                    float(
+                        np.median(
+                            returns
+                        )
+                    ),
+                    2,
+                ),
+
+            "max_gain":
+                round(
+                    float(
+                        returns.max()
+                    ),
+                    2,
+                ),
+
+            "max_loss":
+                round(
+                    float(
+                        returns.min()
+                    ),
+                    2,
+                ),
+        }
+
+    return results
 def run_top_decile_study(
     raw: pd.DataFrame,
     lookahead_days: int = 20,
