@@ -94,10 +94,7 @@ export default async function Dashboard() {
           <h3 className="mb-3 text-xl font-semibold">
             ⭐ Exploded Elite
           </h3>
-        
-          <StockTable
-            rows={data.exploded_elite}
-          />
+          <StockTable rows={data.exploded_elite ?? []} />
         </div>
 
         <div>
@@ -105,9 +102,7 @@ export default async function Dashboard() {
               💎 Exploded Ultra
             </h3>
           
-            <StockTable
-              rows={data.exploded_ultra}
-            />
+            <StockTable rows={data.exploded_ultra ?? []} />
         </div>
         <div>
           <h3 className="mb-3 text-xl font-semibold">
