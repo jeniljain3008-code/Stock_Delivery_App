@@ -59,24 +59,12 @@ def run_explosion_backtest(
 
     results = {}
 
-    latest_date = analytics["Date"].max()
-
     for category in categories:
 
         trades = []
-        candidates = (
-            analytics[
-                analytics["ExplosionCategory"] == category
-            ]
-            .sort_values(
-                "Date"
-            )
-            .groupby(
-                "Symbol"
-            )
-            .tail(1)
-            .copy()
-        )
+        candidates = analytics[
+            analytics["ExplosionCategory"] == category
+        ].copy()
         print(f"{category}: "f"{len(candidates)} candidates")
         candidates = candidates.sort_values(
             ["Symbol", "Date"]
@@ -165,153 +153,84 @@ def run_explosion_backtest(
                 }
             )'''
 
-        trade = {
-            "symbol": symbol,
-            "scan_date": str(
-                scan_date.date()
-            ),
-            "entry_date": str(
-                entry_date.date()
-            ),
-            "entry_price": round(
-                entry_price,
-                2,
-            ),
-        }
-
-        for holding_days in holding_periods:
-
-                if len(future_after_entry) <= holding_days:
-                    continue
-            
-                exit_row = future_after_entry.iloc[
-                    holding_days
-                ]
-            
-                exit_price = float(
-                    exit_row["Close"]
-                )
-            
-                return_pct = (
-                    (
-                        exit_price
-                        - entry_price
-                    )
-                    / entry_price
-                ) * 100
-            
-                trade[
-                    f"return_{holding_days}d"
-                ] = round(
-                    return_pct,
+            trade = {
+                "symbol": symbol,
+                "scan_date": str(
+                    scan_date.date()
+                ),
+                "entry_date": str(
+                    entry_date.date()
+                ),
+                "entry_price": round(
+                    entry_price,
                     2,
-                )
-            
-        trades.append(trade)
-
-        if len(trades) == 0:
-
-            results[category] = {
-                "signals": 0,
-                "breakouts": 0,
-                "win_rate": 0,
-                "avg_return": 0,
-                "median_return": 0,
-                "max_gain": 0,
-                "max_loss": 0,
-                "trade_log": [],
+                ),
             }
-
-            continue
-
-        '''returns = np.array(
-            [
-                t["return_pct"]
-                for t in trades
-            ]
-        )
-
-        results[category] = {
-            "signals": int(
-                len(candidates)
-            ),
-            "breakouts": int(
-                len(trades)
-            ),
-            "win_rate": round(
-                float(
-                    (
-                        returns > 0
-                    ).mean()
-                    * 100
-                ),
-                2,
-            ),
-            "avg_return": round(
-                float(
-                    returns.mean()
-                ),
-                2,
-            ),
-            "median_return": round(
-                float(
-                    np.median(
-                        returns
+    
+            for holding_days in holding_periods:
+    
+                    if len(future_after_entry) <= holding_days:
+                        continue
+                
+                    exit_row = future_after_entry.iloc[
+                        holding_days
+                    ]
+                
+                    exit_price = float(
+                        exit_row["Close"]
                     )
-                ),
-                2,
-            ),
-            "max_gain": round(
-                float(
-                    returns.max()
-                ),
-                2,
-            ),
-            "max_loss": round(
-                float(
-                    returns.min()
-                ),
-                2,
-            ),
-            "trade_log": trades[:100],
-        }'''
-
-
-        performance = {}
-
-        for holding_days in holding_periods:
-        
-            returns = np.array(
-                [
+                
+                    return_pct = (
+                        (
+                            exit_price
+                            - entry_price
+                        )
+                        / entry_price
+                    ) * 100
+                
                     trade[
                         f"return_{holding_days}d"
-                    ]
-                    for trade in trades
-                    if f"return_{holding_days}d"
-                    in trade
-                ]
-            )
-        
-            if len(returns) == 0:
-        
-                performance[
-                    f"{holding_days}d"
-                ] = {
+                    ] = round(
+                        return_pct,
+                        2,
+                    )
+                
+            trades.append(trade)
+    
+            if len(trades) == 0:
+    
+                results[category] = {
+                    "signals": 0,
+                    "breakouts": 0,
                     "win_rate": 0,
                     "avg_return": 0,
                     "median_return": 0,
                     "max_gain": 0,
                     "max_loss": 0,
+                    "trade_log": [],
                 }
-        
+    
                 continue
-        
-            performance[
-                f"{holding_days}d"
-            ] = {
+    
+            '''returns = np.array(
+                [
+                    t["return_pct"]
+                    for t in trades
+                ]
+            )
+    
+            results[category] = {
+                "signals": int(
+                    len(candidates)
+                ),
+                "breakouts": int(
+                    len(trades)
+                ),
                 "win_rate": round(
                     float(
-                        (returns > 0).mean()
+                        (
+                            returns > 0
+                        ).mean()
                         * 100
                     ),
                     2,
@@ -342,17 +261,86 @@ def run_explosion_backtest(
                     ),
                     2,
                 ),
+                "trade_log": trades[:100],
+            }'''
+    
+    
+            performance = {}
+    
+            for holding_days in holding_periods:
+            
+                returns = np.array(
+                    [
+                        trade[
+                            f"return_{holding_days}d"
+                        ]
+                        for trade in trades
+                        if f"return_{holding_days}d"
+                        in trade
+                    ]
+                )
+            
+                if len(returns) == 0:
+            
+                    performance[
+                        f"{holding_days}d"
+                    ] = {
+                        "win_rate": 0,
+                        "avg_return": 0,
+                        "median_return": 0,
+                        "max_gain": 0,
+                        "max_loss": 0,
+                    }
+            
+                    continue
+            
+                performance[
+                    f"{holding_days}d"
+                ] = {
+                    "win_rate": round(
+                        float(
+                            (returns > 0).mean()
+                            * 100
+                        ),
+                        2,
+                    ),
+                    "avg_return": round(
+                        float(
+                            returns.mean()
+                        ),
+                        2,
+                    ),
+                    "median_return": round(
+                        float(
+                            np.median(
+                                returns
+                            )
+                        ),
+                        2,
+                    ),
+                    "max_gain": round(
+                        float(
+                            returns.max()
+                        ),
+                        2,
+                    ),
+                    "max_loss": round(
+                        float(
+                            returns.min()
+                        ),
+                        2,
+                    ),
+                }
+            
+            results[category] = {
+                "signals": int(
+                    len(candidates)
+                ),
+                "breakouts": int(
+                    len(trades)
+                ),
+                "performance": performance,
+                "trade_log": trades[:100],
             }
-        
-        results[category] = {
-            "signals": int(
-                len(candidates)
-            ),
-            "breakouts": int(
-                len(trades)
-            ),
-            "performance": performance,
-            "trade_log": trades[:100],
-        }
 
     return results
