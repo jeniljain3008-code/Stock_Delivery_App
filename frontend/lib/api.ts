@@ -109,6 +109,22 @@ export async function uploadDeliveryFile(
 
   return res.json();
 }
+
+export const getExplodedElite = async () => {
+  const response = await api.get(
+    "/api/v1/scanners/exploded-elite"
+  );
+
+  return response.data;
+};
+
+export const getExplodedUltra = async () => {
+  const response = await api.get(
+    "/api/v1/scanners/exploded-ultra"
+  );
+
+  return response.data;
+};
 export async function downloadNSEDeliveryData(
   tradeDate: string
 ) {
