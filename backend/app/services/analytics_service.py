@@ -5,6 +5,7 @@ import pandas as pd
 from analytics.backtesting import (
     run_backtest,
     run_explosion_backtest,
+    run_pre_explosion_study
 )
 from analytics.delivery_engine import compute_delivery_analytics, scan_gold_stocks
 from analytics.relative_strength import compute_relative_strength
