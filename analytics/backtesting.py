@@ -40,6 +40,285 @@ def run_backtest(
         "trade_log": trades[:100],
     }
 
+def run_pre_explosion_winner_study(
+    raw: pd.DataFrame,
+    winner_threshold: float = 15.0,
+    lookahead_days: int = 20,
+) -> dict:
+
+    analytics = compute_delivery_analytics(raw)
+
+    exploded = analytics[
+        analytics["ExplosionCategory"] == "EXPLODED"
+    ].copy()
+
+    if exploded.empty:
+        return {
+            "error": "No exploded stocks found"
+        }
+
+    stock_lookup = {
+        symbol: group.sort_values("Date").reset_index(drop=True)
+        for symbol, group
+        in analytics.groupby("Symbol")
+    }
+
+    winner_events = []
+
+    for _, row in exploded.iterrows():
+
+        symbol = row["Symbol"]
+
+        stock = stock_lookup.get(symbol)
+
+        if stock is None:
+            continue
+
+        matching_idx = stock.index[
+            stock["Date"] == row["Date"]
+        ]
+
+        if len(matching_idx) == 0:
+            continue
+
+        explosion_idx = matching_idx[0]
+
+        if explosion_idx + lookahead_days >= len(stock):
+            continue
+
+        entry_price = float(
+            row["Close"]
+        )
+
+        future_price = float(
+            stock.iloc[
+                explosion_idx + lookahead_days
+            ]["Close"]
+        )
+
+        future_return = (
+            (
+                future_price
+                - entry_price
+            )
+            / entry_price
+        ) * 100
+
+        if future_return >= winner_threshold:
+
+            winner_events.append(
+                {
+                    "symbol": symbol,
+                    "explosion_date": row["Date"],
+                    "future_return": future_return,
+                }
+            )
+
+    if len(winner_events) == 0:
+
+        return {
+            "error":
+            "No winner explosions found"
+        }
+
+    print(
+        f"Winner explosions found: "
+        f"{len(winner_events)}"
+    )
+
+    lookbacks = [
+        20,
+        15,
+        10,
+        5,
+        0,
+    ]
+
+    results = {}
+
+    for days_before in lookbacks:
+
+        observations = []
+
+        for winner in winner_events:
+
+            symbol = winner["symbol"]
+
+            explosion_date = winner[
+                "explosion_date"
+            ]
+
+            stock = stock_lookup[
+                symbol
+            ]
+
+            matching_idx = stock.index[
+                stock["Date"] == explosion_date
+            ]
+
+            if len(matching_idx) == 0:
+                continue
+
+            explosion_idx = matching_idx[0]
+
+            target_idx = (
+                explosion_idx
+                - days_before
+            )
+
+            if target_idx < 0:
+                continue
+
+            row = stock.iloc[
+                target_idx
+            ]
+
+            observations.append(
+                {
+                    "AccumulationScore":
+                        row["AccumulationScore"],
+
+                    "ExplosionScore":
+                        row["ExplosionScore"],
+
+                    "Surge5D":
+                        row["Surge5D"],
+
+                    "Surge10D":
+                        row["Surge10D"],
+
+                    "Surge30D":
+                        row["Surge30D"],
+
+                    "Surge1M":
+                        row["Surge1M"],
+
+                    "BreakoutScore":
+                        row["BreakoutScore"],
+
+                    "InstitutionalConfidence":
+                        row[
+                            "InstitutionalConfidence"
+                        ],
+                }
+            )
+
+        study_df = pd.DataFrame(
+            observations
+        )
+
+        if study_df.empty:
+
+            results[
+                f"{days_before}_days_before"
+            ] = {
+                "count": 0
+            }
+
+            continue
+
+        results[
+            f"{days_before}_days_before"
+        ] = {
+            "count":
+                int(len(study_df)),
+
+            "avg_accumulation":
+                round(
+                    float(
+                        study_df[
+                            "AccumulationScore"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_explosion_score":
+                round(
+                    float(
+                        study_df[
+                            "ExplosionScore"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge5d":
+                round(
+                    float(
+                        study_df[
+                            "Surge5D"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge10d":
+                round(
+                    float(
+                        study_df[
+                            "Surge10D"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge30d":
+                round(
+                    float(
+                        study_df[
+                            "Surge30D"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge1m":
+                round(
+                    float(
+                        study_df[
+                            "Surge1M"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_breakout_score":
+                round(
+                    float(
+                        study_df[
+                            "BreakoutScore"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_institutional_confidence":
+                round(
+                    float(
+                        study_df[
+                            "InstitutionalConfidence"
+                        ].mean()
+                    ),
+                    2,
+                ),
+        }
+
+    return {
+        "winner_threshold":
+            winner_threshold,
+
+        "lookahead_days":
+            lookahead_days,
+
+        "winner_explosions":
+            len(
+                winner_events
+            ),
+
+        "study_results":
+            results,
+    }
 def run_pre_explosion_study(
     raw: pd.DataFrame,
 ) -> dict:
