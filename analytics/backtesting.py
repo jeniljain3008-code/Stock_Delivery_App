@@ -45,6 +45,11 @@ def run_explosion_backtest(
 ) -> dict:
 
     analytics = compute_delivery_analytics(raw)
+    stock_lookup = {
+        symbol: group.sort_values("Date")
+        for symbol, group
+        in analytics.groupby("Symbol")
+    }
 
     categories = [
         "EXPLODED",
@@ -59,12 +64,20 @@ def run_explosion_backtest(
     for category in categories:
 
         trades = []
-
-        candidates = analytics[
-            analytics["ExplosionCategory"] == category
-        ].copy()
-
-        print(category,len(candidates))
+        candidates = (
+            analytics[
+                analytics["ExplosionCategory"] == category
+            ]
+            .sort_values(
+                "Date"
+            )
+            .groupby(
+                "Symbol"
+            )
+            .tail(1)
+            .copy()
+        )
+        print(f"{category}: "f"{len(candidates)} candidates")
         candidates = candidates.sort_values(
             ["Symbol", "Date"]
         )
@@ -79,11 +92,9 @@ def run_explosion_backtest(
                 row["High"]
             )
 
-            stock = analytics[
-                analytics["Symbol"] == symbol
-            ].sort_values(
-                "Date"
-            )
+            stock = stock_lookup[
+                symbol
+            ]
 
             future = stock[
                 stock["Date"] > scan_date
