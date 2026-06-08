@@ -7,7 +7,8 @@ from analytics.backtesting import (
     run_explosion_backtest,
     run_pre_explosion_study,
     run_pre_explosion_winner_study,
-    run_winner_vs_loser_study
+    run_winner_vs_loser_study,
+    run_top_decile_study
 )
 from analytics.delivery_engine import compute_delivery_analytics, scan_gold_stocks
 from analytics.relative_strength import compute_relative_strength
@@ -434,6 +435,29 @@ class AnalyticsService:
             db.close()
     
         return run_winner_vs_loser_study(
+            df
+        )
+
+    def top_decile_study(
+        self,
+        days: int = 365,
+    ) -> dict:
+
+        db = SessionLocal()
+    
+        try:
+    
+            repo = StockRepository(db)
+    
+            df = repo.get_backtest_dataframe(
+                days=days
+            )
+    
+        finally:
+    
+            db.close()
+    
+        return run_top_decile_study(
             df
         )
     def pre_explosion_winner_study(
