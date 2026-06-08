@@ -134,6 +134,17 @@ def pre_explosion_winner_study(
         days=days
     )
 
+@router.get(
+    "/backtests/winner-vs-loser-study"
+)
+def winner_vs_loser_study(
+    days: int = 365,
+):
+
+    return AnalyticsService(
+    ).winner_vs_loser_study(
+        days=days
+    )
 @router.post("/ai/ask", response_model=AIAnswer)
 def ask_ai(question: AIQuestion):
     analytics = AnalyticsService()
