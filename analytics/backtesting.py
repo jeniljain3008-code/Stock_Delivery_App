@@ -64,6 +64,7 @@ def run_explosion_backtest(
             analytics["ExplosionCategory"] == category
         ].copy()
 
+        print(category,len(candidates))
         candidates = candidates.sort_values(
             ["Symbol", "Date"]
         )
