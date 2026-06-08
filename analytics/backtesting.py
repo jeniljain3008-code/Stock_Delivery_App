@@ -44,8 +44,197 @@ def run_pre_explosion_study(
     raw: pd.DataFrame,
 ) -> dict:
 
+    analytics = compute_delivery_analytics(raw)
+
+    exploded = analytics[
+        analytics["ExplosionCategory"] == "EXPLODED"
+    ].copy()
+
+    if exploded.empty:
+        return {
+            "error": "No exploded stocks found"
+        }
+
+    first_explosions = (
+        exploded
+        .sort_values("Date")
+        .groupby("Symbol")
+        .head(1)
+        .copy()
+    )
+
+    print(
+        f"Found {len(first_explosions)} first explosion events"
+    )
+
+    lookbacks = [
+        20,
+        15,
+        10,
+        5,
+        0,
+    ]
+
+    results = {}
+
+    stock_lookup = {
+        symbol: group.sort_values("Date").reset_index(drop=True)
+        for symbol, group
+        in analytics.groupby("Symbol")
+    }
+
+    for days_before in lookbacks:
+
+        observations = []
+
+        for _, explosion_row in first_explosions.iterrows():
+
+            symbol = explosion_row["Symbol"]
+
+            explosion_date = explosion_row["Date"]
+
+            stock = stock_lookup.get(
+                symbol
+            )
+
+            if stock is None:
+                continue
+
+            matching_idx = stock.index[
+                stock["Date"] == explosion_date
+            ]
+
+            if len(matching_idx) == 0:
+                continue
+
+            explosion_idx = matching_idx[0]
+
+            target_idx = (
+                explosion_idx
+                - days_before
+            )
+
+            if target_idx < 0:
+                continue
+
+            row = stock.iloc[
+                target_idx
+            ]
+
+            observations.append(
+                {
+                    "AccumulationScore":
+                        row["AccumulationScore"],
+
+                    "ExplosionScore":
+                        row["ExplosionScore"],
+
+                    "Surge5D":
+                        row["Surge5D"],
+
+                    "Surge10D":
+                        row["Surge10D"],
+
+                    "Surge30D":
+                        row["Surge30D"],
+
+                    "Surge1M":
+                        row["Surge1M"],
+                }
+            )
+
+        study_df = pd.DataFrame(
+            observations
+        )
+
+        if study_df.empty:
+
+            results[
+                f"{days_before}_days_before"
+            ] = {
+                "count": 0
+            }
+
+            continue
+
+        results[
+            f"{days_before}_days_before"
+        ] = {
+            "count": int(
+                len(study_df)
+            ),
+
+            "avg_accumulation_score":
+                round(
+                    float(
+                        study_df[
+                            "AccumulationScore"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_explosion_score":
+                round(
+                    float(
+                        study_df[
+                            "ExplosionScore"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge_5d":
+                round(
+                    float(
+                        study_df[
+                            "Surge5D"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge_10d":
+                round(
+                    float(
+                        study_df[
+                            "Surge10D"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge_30d":
+                round(
+                    float(
+                        study_df[
+                            "Surge30D"
+                        ].mean()
+                    ),
+                    2,
+                ),
+
+            "avg_surge_1m":
+                round(
+                    float(
+                        study_df[
+                            "Surge1M"
+                        ].mean()
+                    ),
+                    2,
+                ),
+        }
+
     return {
-        "status": "working"
+        "exploded_stocks":
+            int(
+                len(
+                    first_explosions
+                )
+            ),
+
+        "study_results":
+            results,
     }
 def run_explosion_backtest(
     raw: pd.DataFrame,
