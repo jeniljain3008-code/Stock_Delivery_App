@@ -207,9 +207,7 @@ def run_explosion_backtest(
                     2,
                 )
             
-            trades.append(
-                trade
-            )
+            trades.append(trade)
 
         if len(trades) == 0:
 
