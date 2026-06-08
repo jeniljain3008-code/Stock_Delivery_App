@@ -39,6 +39,14 @@ def run_backtest(
         "sharpe_ratio": round(float((returns.mean() / (returns.std() or 1)) * np.sqrt(12)), 2),
         "trade_log": trades[:100],
     }
+
+def run_pre_explosion_study(
+    raw: pd.DataFrame,
+) -> dict:
+
+    return {
+        "status": "working"
+    }
 def run_explosion_backtest(
     raw: pd.DataFrame,
     holding_periods = [ 5, 10, 15, 20, ],
