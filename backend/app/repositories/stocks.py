@@ -88,15 +88,15 @@ class StockRepository:
             FROM stock_prices sp
             INNER JOIN stocks s
                 ON s.id = sp.stock_id
-            WHERE sp.trade_date >= CURRENT_DATE - INTERVAL '365 days'
+            WHERE sp.trade_date >= CURRENT_DATE - INTERVAL '{days} days'
             ORDER BY
                 s.symbol,
                 sp.trade_date
             """
         )
 
-        result = self.db.execute(query)
-
+        result = self.db.execute(query,{"days": days},)
+        
         rows = result.fetchall()
 
         if not rows:
