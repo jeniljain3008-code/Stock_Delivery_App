@@ -415,27 +415,27 @@ class AnalyticsService:
             days: int = 365,
     ) -> dict:
 
-    db = SessionLocal()
-
-    try:
-
-        repo = StockRepository(db)
-
-        df = repo.get_backtest_dataframe(
-            days=days,
+        db = SessionLocal()
+    
+        try:
+    
+            repo = StockRepository(db)
+    
+            df = repo.get_backtest_dataframe(
+                days=days,
+            )
+    
+        finally:
+    
+            db.close()
+    
+        if df.empty:
+    
+            return {
+                "error":
+                "No market data available"
+            }
+    
+        return run_explosion_backtest(
+            df
         )
-
-    finally:
-
-        db.close()
-
-    if df.empty:
-
-        return {
-            "error":
-            "No market data available"
-        }
-
-    return run_explosion_backtest(
-        df
-    )
