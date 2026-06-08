@@ -109,7 +109,19 @@ def explosion_backtest(
     return AnalyticsService().explosion_backtest(
         request.days,
     )
-    
+
+@router.get(
+    "/backtests/pre-explosion-study"
+)
+def pre_explosion_study(
+    days: int = 365,
+):
+
+    return AnalyticsService(
+    ).pre_explosion_study(
+        days=days
+    )
+
 @router.post("/ai/ask", response_model=AIAnswer)
 def ask_ai(question: AIQuestion):
     analytics = AnalyticsService()
