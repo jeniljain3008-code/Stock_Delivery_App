@@ -187,6 +187,11 @@ class AnalyticsService:
             "exploded_stocks": self._rows(
                 exploded
             ),
+            "exploded_elite":
+                self.exploded_elite(),
+
+            "exploded_ultra":
+                self.exploded_ultra(),
 
             "ready_to_explode": self._rows(
                 ready_to_explode
