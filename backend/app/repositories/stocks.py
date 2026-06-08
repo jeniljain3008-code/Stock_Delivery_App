@@ -67,6 +67,77 @@ class StockRepository:
             )
         )
 
+    def get_backtest_dataframe(self,days: int = 365,) -> pd.DataFrame:
+        """
+        Loads all stock price history from Supabase/PostgreSQL
+        into a pandas dataframe for analytics.
+        """
+
+        query = text(
+            """
+            SELECT
+                sp.trade_date AS "Date",
+                s.symbol AS "Symbol",
+                sp.open AS "Open",
+                sp.high AS "High",
+                sp.low AS "Low",
+                sp.close AS "Close",
+                sp.volume AS "Volume",
+                sp.delivery_qty AS "DeliveryQty",
+                sp.delivery_percent AS "DeliveryPercent"
+            FROM stock_prices sp
+            INNER JOIN stocks s
+                ON s.id = sp.stock_id
+            WHERE sp.trade_date >= CURRENT_DATE - INTERVAL '365 days'
+            ORDER BY
+                s.symbol,
+                sp.trade_date
+            """
+        )
+
+        result = self.db.execute(query)
+
+        rows = result.fetchall()
+
+        if not rows:
+            return pd.DataFrame(
+                columns=[
+                    "Date",
+                    "Symbol",
+                    "Open",
+                    "High",
+                    "Low",
+                    "Close",
+                    "Volume",
+                    "DeliveryQty",
+                    "DeliveryPercent",
+                ]
+            )
+
+        df = pd.DataFrame(
+            rows,
+            columns=result.keys(),
+        )
+
+        # Convert PostgreSQL NUMERIC/DECIMAL values to Pandas numeric types
+        numeric_cols = [
+            "Open",
+            "High",
+            "Low",
+            "Close",
+            "Volume",
+            "DeliveryQty",
+            "DeliveryPercent",
+        ]
+
+        for col in numeric_cols:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+        # Ensure Date column is datetime
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+
+        return df
+
     def get_all_prices_dataframe(self) -> pd.DataFrame:
         """
         Loads all stock price history from Supabase/PostgreSQL
