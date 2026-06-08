@@ -7,6 +7,8 @@ export type StockRow = {
 
   delivery_surge: number;
 
+  delivery_percent?: number;
+  
   surge_5d?: number;
   surge_10d?: number;
   surge_30d?: number;
@@ -40,6 +42,9 @@ export function StockTable({
               Price
             </th>
 
+            <th>
+              Del %
+            </th>  
             <th>
               5D
             </th>
@@ -88,6 +93,12 @@ export function StockTable({
                   {row.close}
                 </td>
 
+                <td>
+                    {(
+                      row.delivery_percent ??
+                      0
+                    ).toFixed(1)}
+                </td>
                 <td>
                   {(
                     row.surge_5d ??
