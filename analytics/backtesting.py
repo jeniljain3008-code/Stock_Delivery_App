@@ -392,6 +392,255 @@ def run_winner_vs_loser_study(
         "losers":
             loser_stats,
     }
+
+def run_top_decile_study(
+    raw: pd.DataFrame,
+    lookahead_days: int = 20,
+) -> dict:
+
+    analytics = compute_delivery_analytics(raw)
+
+    exploded = analytics[
+        analytics["ExplosionCategory"] == "EXPLODED"
+    ].copy()
+
+    if exploded.empty:
+        return {
+            "error": "No exploded stocks found"
+        }
+
+    exploded = (
+        exploded
+        .sort_values("Date")
+        .groupby("Symbol")
+        .head(1)
+        .copy()
+    )
+
+    stock_lookup = {
+        symbol: group.sort_values("Date").reset_index(drop=True)
+        for symbol, group
+        in analytics.groupby("Symbol")
+    }
+
+    observations = []
+
+    for _, row in exploded.iterrows():
+
+        symbol = row["Symbol"]
+
+        stock = stock_lookup.get(symbol)
+
+        if stock is None:
+            continue
+
+        matching_idx = stock.index[
+            stock["Date"] == row["Date"]
+        ]
+
+        if len(matching_idx) == 0:
+            continue
+
+        explosion_idx = matching_idx[0]
+
+        if explosion_idx + lookahead_days >= len(stock):
+            continue
+
+        entry_price = float(
+            row["Close"]
+        )
+
+        future_price = float(
+            stock.iloc[
+                explosion_idx + lookahead_days
+            ]["Close"]
+        )
+
+        future_return = (
+            (
+                future_price
+                - entry_price
+            )
+            / entry_price
+        ) * 100
+
+        volume_ratio = (
+            float(row["Volume"])
+            / max(
+                float(row["VolumeMA20"]),
+                1,
+            )
+        )
+
+        observations.append(
+            {
+                "FutureReturn": future_return,
+                "AccumulationScore": float(row["AccumulationScore"]),
+                "ExplosionScore": float(row["ExplosionScore"]),
+                "BreakoutScore": float(row["BreakoutScore"]),
+                "InstitutionalConfidence": float(
+                    row["InstitutionalConfidence"]
+                ),
+                "Surge5D": float(row["Surge5D"]),
+                "Surge10D": float(row["Surge10D"]),
+                "Surge30D": float(row["Surge30D"]),
+                "Surge1M": float(row["Surge1M"]),
+                "DeliveryPercent": float(
+                    row["DeliveryPercent"]
+                ),
+                "VolumeRatio": volume_ratio,
+            }
+        )
+
+    df = pd.DataFrame(
+        observations
+    )
+
+    if df.empty:
+        return {
+            "error":
+            "No valid observations"
+        }
+
+    df = df.sort_values(
+        "FutureReturn"
+    )
+
+    decile_size = max(
+        1,
+        int(
+            len(df) * 0.10
+        )
+    )
+
+    bottom_decile = df.head(
+        decile_size
+    )
+
+    top_decile = df.tail(
+        decile_size
+    )
+
+    metrics = [
+        "AccumulationScore",
+        "ExplosionScore",
+        "BreakoutScore",
+        "InstitutionalConfidence",
+        "Surge5D",
+        "Surge10D",
+        "Surge30D",
+        "Surge1M",
+        "DeliveryPercent",
+        "VolumeRatio",
+    ]
+
+    top_stats = {}
+    bottom_stats = {}
+
+    for metric in metrics:
+
+        top_stats[metric] = {
+            "mean": round(
+                float(
+                    top_decile[
+                        metric
+                    ].mean()
+                ),
+                2,
+            ),
+            "median": round(
+                float(
+                    top_decile[
+                        metric
+                    ].median()
+                ),
+                2,
+            ),
+        }
+
+        bottom_stats[metric] = {
+            "mean": round(
+                float(
+                    bottom_decile[
+                        metric
+                    ].mean()
+                ),
+                2,
+            ),
+            "median": round(
+                float(
+                    bottom_decile[
+                        metric
+                    ].median()
+                ),
+                2,
+            ),
+        }
+
+    return {
+        "total_signals":
+            int(
+                len(df)
+            ),
+
+        "top_decile_count":
+            int(
+                len(
+                    top_decile
+                )
+            ),
+
+        "bottom_decile_count":
+            int(
+                len(
+                    bottom_decile
+                )
+            ),
+
+        "top_decile_return": {
+            "mean": round(
+                float(
+                    top_decile[
+                        "FutureReturn"
+                    ].mean()
+                ),
+                2,
+            ),
+            "median": round(
+                float(
+                    top_decile[
+                        "FutureReturn"
+                    ].median()
+                ),
+                2,
+            ),
+        },
+
+        "bottom_decile_return": {
+            "mean": round(
+                float(
+                    bottom_decile[
+                        "FutureReturn"
+                    ].mean()
+                ),
+                2,
+            ),
+            "median": round(
+                float(
+                    bottom_decile[
+                        "FutureReturn"
+                    ].median()
+                ),
+                2,
+            ),
+        },
+
+        "top_decile":
+            top_stats,
+
+        "bottom_decile":
+            bottom_stats,
+    }
 def run_pre_explosion_winner_study(
     raw: pd.DataFrame,
     winner_threshold: float = 15.0,
