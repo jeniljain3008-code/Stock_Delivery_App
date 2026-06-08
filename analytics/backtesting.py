@@ -1116,6 +1116,192 @@ def run_pre_explosion_study(
         "study_results":
             results,
     }
+
+def run_filtered_exploded_backtest(
+    raw: pd.DataFrame,
+    lookahead_days: int = 20,
+) -> dict:
+
+    analytics = compute_delivery_analytics(raw)
+
+    analytics["VolumeRatio"] = (
+        analytics["Volume"]
+        / analytics["VolumeMA20"].replace(
+            0,
+            np.nan,
+        )
+    )
+
+    exploded = analytics[
+        analytics["ExplosionCategory"]
+        == "EXPLODED"
+    ].copy()
+
+    exploded = (
+        exploded
+        .sort_values("Date")
+        .groupby("Symbol")
+        .head(1)
+        .copy()
+    )
+
+    filtered = exploded[
+        (
+            exploded["DeliveryPercent"]
+            >= 60
+        )
+        &
+        (
+            exploded["Surge30D"]
+            >= 2.4
+        )
+        &
+        (
+            exploded["VolumeRatio"]
+            <= 3.0
+        )
+    ].copy()
+
+    stock_lookup = {
+        symbol: group.sort_values(
+            "Date"
+        ).reset_index(
+            drop=True
+        )
+        for symbol, group
+        in analytics.groupby(
+            "Symbol"
+        )
+    }
+
+    def evaluate(df):
+
+        returns = []
+
+        for _, row in df.iterrows():
+
+            symbol = row["Symbol"]
+
+            stock = stock_lookup.get(
+                symbol
+            )
+
+            if stock is None:
+                continue
+
+            matching_idx = stock.index[
+                stock["Date"]
+                == row["Date"]
+            ]
+
+            if len(matching_idx) == 0:
+                continue
+
+            idx = matching_idx[0]
+
+            if (
+                idx
+                + lookahead_days
+                >= len(stock)
+            ):
+                continue
+
+            entry_price = float(
+                row["Close"]
+            )
+
+            exit_price = float(
+                stock.iloc[
+                    idx
+                    + lookahead_days
+                ]["Close"]
+            )
+
+            ret = (
+                (
+                    exit_price
+                    - entry_price
+                )
+                / entry_price
+            ) * 100
+
+            returns.append(ret)
+
+        if len(returns) == 0:
+
+            return {
+                "signals": 0
+            }
+
+        returns = np.array(
+            returns
+        )
+
+        return {
+            "signals":
+                int(
+                    len(
+                        returns
+                    )
+                ),
+
+            "win_rate":
+                round(
+                    float(
+                        (
+                            returns > 0
+                        ).mean()
+                        * 100
+                    ),
+                    2,
+                ),
+
+            "avg_return":
+                round(
+                    float(
+                        returns.mean()
+                    ),
+                    2,
+                ),
+
+            "median_return":
+                round(
+                    float(
+                        np.median(
+                            returns
+                        )
+                    ),
+                    2,
+                ),
+
+            "max_gain":
+                round(
+                    float(
+                        returns.max()
+                    ),
+                    2,
+                ),
+
+            "max_loss":
+                round(
+                    float(
+                        returns.min()
+                    ),
+                    2,
+                ),
+        }
+
+    return {
+        "baseline":
+            evaluate(
+                exploded
+            ),
+
+        "filtered":
+            evaluate(
+                filtered
+            ),
+    }
 def run_explosion_backtest(
     raw: pd.DataFrame,
     holding_periods = [ 5, 10, 15, 20, ],
