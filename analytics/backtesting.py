@@ -62,9 +62,18 @@ def run_explosion_backtest(
     for category in categories:
 
         trades = []
-        candidates = analytics[
+        '''candidates = analytics[
             analytics["ExplosionCategory"] == category
-        ].copy()
+        ].copy()'''
+        candidates = (
+            analytics[
+                analytics["ExplosionCategory"] == category
+            ]
+            .sort_values("Date")
+            .groupby("Symbol")
+            .tail(1)
+            .copy()
+        )
         print(f"{category}: "f"{len(candidates)} candidates")
         candidates = candidates.sort_values(
             ["Symbol", "Date"]
