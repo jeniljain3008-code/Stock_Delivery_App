@@ -7,7 +7,7 @@ from analytics.backtesting import (
     run_explosion_backtest,
     run_pre_explosion_study,
     run_pre_explosion_winner_study,
-    run_pre_explosion_winner_study
+    run_winner_vs_loser_study
 )
 from analytics.delivery_engine import compute_delivery_analytics, scan_gold_stocks
 from analytics.relative_strength import compute_relative_strength
