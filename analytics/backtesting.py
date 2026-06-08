@@ -41,7 +41,7 @@ def run_backtest(
     }
 def run_explosion_backtest(
     raw: pd.DataFrame,
-    holding_days: int = 20,
+    holding_periods = [ 5, 10, 15, 20, ],
 ) -> dict:
 
     analytics = compute_delivery_analytics(raw)
@@ -122,7 +122,7 @@ def run_explosion_backtest(
                 drop=True
             )
 
-            if len(future_after_entry) <= holding_days:
+            '''if len(future_after_entry) <= holding_days:
                 continue
 
             exit_row = future_after_entry.iloc[
@@ -163,6 +163,52 @@ def run_explosion_backtest(
                         2,
                     ),
                 }
+            )'''
+
+        trade = {
+            "symbol": symbol,
+            "scan_date": str(
+                scan_date.date()
+            ),
+            "entry_date": str(
+                entry_date.date()
+            ),
+            "entry_price": round(
+                entry_price,
+                2,
+            ),
+        }
+
+        for holding_days in holding_periods:
+
+                if len(future_after_entry) <= holding_days:
+                    continue
+            
+                exit_row = future_after_entry.iloc[
+                    holding_days
+                ]
+            
+                exit_price = float(
+                    exit_row["Close"]
+                )
+            
+                return_pct = (
+                    (
+                        exit_price
+                        - entry_price
+                    )
+                    / entry_price
+                ) * 100
+            
+                trade[
+                    f"return_{holding_days}d"
+                ] = round(
+                    return_pct,
+                    2,
+                )
+            
+            trades.append(
+                trade
             )
 
         if len(trades) == 0:
@@ -180,7 +226,7 @@ def run_explosion_backtest(
 
             continue
 
-        returns = np.array(
+        '''returns = np.array(
             [
                 t["return_pct"]
                 for t in trades
@@ -229,6 +275,85 @@ def run_explosion_backtest(
                 ),
                 2,
             ),
+            "trade_log": trades[:100],
+        }'''
+
+
+        performance = {}
+
+        for holding_days in holding_periods:
+        
+            returns = np.array(
+                [
+                    trade[
+                        f"return_{holding_days}d"
+                    ]
+                    for trade in trades
+                    if f"return_{holding_days}d"
+                    in trade
+                ]
+            )
+        
+            if len(returns) == 0:
+        
+                performance[
+                    f"{holding_days}d"
+                ] = {
+                    "win_rate": 0,
+                    "avg_return": 0,
+                    "median_return": 0,
+                    "max_gain": 0,
+                    "max_loss": 0,
+                }
+        
+                continue
+        
+            performance[
+                f"{holding_days}d"
+            ] = {
+                "win_rate": round(
+                    float(
+                        (returns > 0).mean()
+                        * 100
+                    ),
+                    2,
+                ),
+                "avg_return": round(
+                    float(
+                        returns.mean()
+                    ),
+                    2,
+                ),
+                "median_return": round(
+                    float(
+                        np.median(
+                            returns
+                        )
+                    ),
+                    2,
+                ),
+                "max_gain": round(
+                    float(
+                        returns.max()
+                    ),
+                    2,
+                ),
+                "max_loss": round(
+                    float(
+                        returns.min()
+                    ),
+                    2,
+                ),
+            }
+        
+        results[category] = {
+            "signals": int(
+                len(candidates)
+            ),
+            "breakouts": int(
+                len(trades)
+            ),
+            "performance": performance,
             "trade_log": trades[:100],
         }
 
