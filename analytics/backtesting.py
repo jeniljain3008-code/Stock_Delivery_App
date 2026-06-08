@@ -57,6 +57,15 @@ def run_winner_vs_loser_study(
             "error": "No exploded stocks found"
         }
 
+    # Use only first EXPLODED signal per stock
+    exploded = (
+        exploded
+        .sort_values("Date")
+        .groupby("Symbol")
+        .head(1)
+        .copy()
+    )
+
     stock_lookup = {
         symbol: group.sort_values(
             "Date"
@@ -93,8 +102,7 @@ def run_winner_vs_loser_study(
         explosion_idx = matching_idx[0]
 
         if (
-            explosion_idx
-            + lookahead_days
+            explosion_idx + lookahead_days
             >= len(stock)
         ):
             continue
@@ -105,8 +113,7 @@ def run_winner_vs_loser_study(
 
         future_price = float(
             stock.iloc[
-                explosion_idx
-                + lookahead_days
+                explosion_idx + lookahead_days
             ]["Close"]
         )
 
@@ -129,6 +136,9 @@ def run_winner_vs_loser_study(
         )
 
         observation = {
+            "FutureReturn":
+                future_return,
+
             "AccumulationScore":
                 float(
                     row["AccumulationScore"]
@@ -180,9 +190,6 @@ def run_winner_vs_loser_study(
 
             "VolumeRatio":
                 volume_ratio,
-
-            "FutureReturn":
-                future_return,
         }
 
         if future_return >= winner_threshold:
@@ -235,29 +242,92 @@ def run_winner_vs_loser_study(
 
     for metric in metrics:
 
-        winner_stats[
-            metric
-        ] = round(
-            float(
-                winner_df[
-                    metric
-                ].mean()
+        winner_stats[metric] = {
+            "mean": round(
+                float(
+                    winner_df[
+                        metric
+                    ].mean()
+                ),
+                2,
             ),
-            2,
-        )
+            "median": round(
+                float(
+                    winner_df[
+                        metric
+                    ].median()
+                ),
+                2,
+            ),
+            "p75": round(
+                float(
+                    winner_df[
+                        metric
+                    ].quantile(
+                        0.75
+                    )
+                ),
+                2,
+            ),
+            "p90": round(
+                float(
+                    winner_df[
+                        metric
+                    ].quantile(
+                        0.90
+                    )
+                ),
+                2,
+            ),
+        }
 
-        loser_stats[
-            metric
-        ] = round(
-            float(
-                loser_df[
-                    metric
-                ].mean()
+        loser_stats[metric] = {
+            "mean": round(
+                float(
+                    loser_df[
+                        metric
+                    ].mean()
+                ),
+                2,
             ),
-            2,
-        )
+            "median": round(
+                float(
+                    loser_df[
+                        metric
+                    ].median()
+                ),
+                2,
+            ),
+            "p75": round(
+                float(
+                    loser_df[
+                        metric
+                    ].quantile(
+                        0.75
+                    )
+                ),
+                2,
+            ),
+            "p90": round(
+                float(
+                    loser_df[
+                        metric
+                    ].quantile(
+                        0.90
+                    )
+                ),
+                2,
+            ),
+        }
 
     return {
+        "total_unique_exploded":
+            int(
+                len(
+                    exploded
+                )
+            ),
+
         "winner_count":
             int(
                 len(
@@ -277,6 +347,44 @@ def run_winner_vs_loser_study(
 
         "lookahead_days":
             lookahead_days,
+
+        "winner_return_stats": {
+            "mean": round(
+                float(
+                    winner_df[
+                        "FutureReturn"
+                    ].mean()
+                ),
+                2,
+            ),
+            "median": round(
+                float(
+                    winner_df[
+                        "FutureReturn"
+                    ].median()
+                ),
+                2,
+            ),
+        },
+
+        "loser_return_stats": {
+            "mean": round(
+                float(
+                    loser_df[
+                        "FutureReturn"
+                    ].mean()
+                ),
+                2,
+            ),
+            "median": round(
+                float(
+                    loser_df[
+                        "FutureReturn"
+                    ].median()
+                ),
+                2,
+            ),
+        },
 
         "winners":
             winner_stats,
