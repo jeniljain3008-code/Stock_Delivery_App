@@ -344,7 +344,10 @@ class AnalyticsService:
                         float(
                             row.get(
                                 "DeliveryPercent",
-                                0,
+                                row.get(
+                                    "delivery_percent",
+                                    0,
+                                ),
                             )
                         ),
                         2,
