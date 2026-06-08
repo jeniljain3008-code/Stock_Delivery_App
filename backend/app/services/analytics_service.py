@@ -415,6 +415,16 @@ class AnalyticsService:
             days: int = 365,
     ) -> dict:
 
+
+        import gc
+
+        if hasattr(
+            self,
+            "demo_df",
+        ):
+            del self.demo_df
+        gc.collect()
+        
         db = SessionLocal()
     
         try:
