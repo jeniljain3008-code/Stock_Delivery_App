@@ -86,3 +86,6 @@ class BacktestResult(BaseModel):
     max_drawdown: float
     sharpe_ratio: float
     trade_log: list[dict]
+    
+class ExplosionBacktestRequest(BaseModel):
+    days: int = 365
