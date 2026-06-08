@@ -429,9 +429,9 @@ class AnalyticsService:
     
             db.close()
 
-    return run_pre_explosion_study(
-        df
-    )    
+        return run_pre_explosion_study(
+            df
+        )    
     
     def explosion_backtest(
         self,
