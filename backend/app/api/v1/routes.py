@@ -157,6 +157,18 @@ def top_decile_study(
     ).top_decile_study(
         days=days
     )
+
+@router.get(
+    "/backtests/filtered-exploded"
+)
+def filtered_exploded(
+    days: int = 365,
+):
+
+    return AnalyticsService(
+    ).filtered_exploded_backtest(
+        days=days
+    )
 @router.post("/ai/ask", response_model=AIAnswer)
 def ask_ai(question: AIQuestion):
     analytics = AnalyticsService()
