@@ -461,8 +461,6 @@ class AnalyticsService:
                 "error": "No market data available"
             }
 
-        return {
-            "rows": len(df),
-            "min_date": str(df["Date"].min()),
-            "max_date": str(df["Date"].max()),
-        }
+        return run_explosion_backtest(
+            df
+        )
