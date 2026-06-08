@@ -9,7 +9,8 @@ from analytics.backtesting import (
     run_pre_explosion_winner_study,
     run_winner_vs_loser_study,
     run_top_decile_study,
-    run_filtered_exploded_backtest
+    run_filtered_exploded_backtest,
+    run_exploded_filter_optimization
 )
 from analytics.delivery_engine import compute_delivery_analytics, scan_gold_stocks
 from analytics.relative_strength import compute_relative_strength
@@ -439,6 +440,28 @@ class AnalyticsService:
             df
         )
 
+    def exploded_filter_optimization(
+        self,
+        days: int = 365,
+    ) -> dict:
+
+        db = SessionLocal()
+    
+        try:
+    
+            repo = StockRepository(db)
+    
+            df = repo.get_backtest_dataframe(
+                days=days
+            )
+    
+        finally:
+    
+            db.close()
+    
+        return run_exploded_filter_optimization(
+            df
+        )
     def filtered_exploded_backtest(
         self,
         days: int = 365,
