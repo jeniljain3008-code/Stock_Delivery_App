@@ -2,7 +2,10 @@ import logging
 
 import pandas as pd
 
-from analytics.backtesting import run_backtest
+from analytics.backtesting import (
+    run_backtest,
+    run_explosion_backtest,
+)
 from analytics.delivery_engine import compute_delivery_analytics, scan_gold_stocks
 from analytics.relative_strength import compute_relative_strength
 from analytics.sector_rotation import compute_sector_rotation
@@ -407,3 +410,32 @@ class AnalyticsService:
             )
 
         return out
+    def explosion_backtest(
+    self,
+    days: int = 365,
+) -> dict:
+
+    db = SessionLocal()
+
+    try:
+
+        repo = StockRepository(db)
+
+        df = repo.get_backtest_dataframe(
+            days=days,
+        )
+
+    finally:
+
+        db.close()
+
+    if df.empty:
+
+        return {
+            "error":
+            "No market data available"
+        }
+
+    return run_explosion_backtest(
+        df
+    )
