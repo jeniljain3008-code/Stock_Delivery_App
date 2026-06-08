@@ -16,11 +16,15 @@ type DashboardSummary = {
   top_breakouts: StockRow[];
 
   exploded_stocks: StockRow[];
+  exploded_elite: StockRow[];
+  exploded_ultra: StockRow[];
+
   ready_to_explode: StockRow[];
   preparing_to_explode: StockRow[];
 
   market_summary: string;
 };
+
 const fallbackDashboard: DashboardSummary = {
   kpis: [
     { label: "Total Stocks Analyzed", value: 0 },
@@ -33,6 +37,8 @@ const fallbackDashboard: DashboardSummary = {
   top_breakouts: [],
 
   exploded_stocks: [],
+  exploded_elite: [],
+  exploded_ultra: [],
   ready_to_explode: [],
   preparing_to_explode: [],
 
@@ -84,7 +90,25 @@ export default async function Dashboard() {
             rows={data.exploded_stocks}
           />
         </div>
-      
+        <div>
+          <h3 className="mb-3 text-xl font-semibold">
+            ⭐ Exploded Elite
+          </h3>
+        
+          <StockTable
+            rows={data.exploded_elite}
+          />
+        </div>
+
+        <div>
+            <h3 className="mb-3 text-xl font-semibold">
+              💎 Exploded Ultra
+            </h3>
+          
+            <StockTable
+              rows={data.exploded_ultra}
+            />
+        </div>
         <div>
           <h3 className="mb-3 text-xl font-semibold">
             🔥 Ready To Explode
