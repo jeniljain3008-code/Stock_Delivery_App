@@ -40,6 +40,250 @@ def run_backtest(
         "trade_log": trades[:100],
     }
 
+def run_winner_vs_loser_study(
+    raw: pd.DataFrame,
+    lookahead_days: int = 20,
+    winner_threshold: float = 15.0,
+) -> dict:
+
+    analytics = compute_delivery_analytics(raw)
+
+    exploded = analytics[
+        analytics["ExplosionCategory"] == "EXPLODED"
+    ].copy()
+
+    if exploded.empty:
+        return {
+            "error": "No exploded stocks found"
+        }
+
+    stock_lookup = {
+        symbol: group.sort_values(
+            "Date"
+        ).reset_index(
+            drop=True
+        )
+        for symbol, group
+        in analytics.groupby(
+            "Symbol"
+        )
+    }
+
+    winners = []
+    losers = []
+
+    for _, row in exploded.iterrows():
+
+        symbol = row["Symbol"]
+
+        stock = stock_lookup.get(
+            symbol
+        )
+
+        if stock is None:
+            continue
+
+        matching_idx = stock.index[
+            stock["Date"] == row["Date"]
+        ]
+
+        if len(matching_idx) == 0:
+            continue
+
+        explosion_idx = matching_idx[0]
+
+        if (
+            explosion_idx
+            + lookahead_days
+            >= len(stock)
+        ):
+            continue
+
+        entry_price = float(
+            row["Close"]
+        )
+
+        future_price = float(
+            stock.iloc[
+                explosion_idx
+                + lookahead_days
+            ]["Close"]
+        )
+
+        future_return = (
+            (
+                future_price
+                - entry_price
+            )
+            / entry_price
+        ) * 100
+
+        volume_ratio = (
+            float(row["Volume"])
+            / max(
+                float(
+                    row["VolumeMA20"]
+                ),
+                1,
+            )
+        )
+
+        observation = {
+            "AccumulationScore":
+                float(
+                    row["AccumulationScore"]
+                ),
+
+            "ExplosionScore":
+                float(
+                    row["ExplosionScore"]
+                ),
+
+            "BreakoutScore":
+                float(
+                    row["BreakoutScore"]
+                ),
+
+            "InstitutionalConfidence":
+                float(
+                    row[
+                        "InstitutionalConfidence"
+                    ]
+                ),
+
+            "Surge5D":
+                float(
+                    row["Surge5D"]
+                ),
+
+            "Surge10D":
+                float(
+                    row["Surge10D"]
+                ),
+
+            "Surge30D":
+                float(
+                    row["Surge30D"]
+                ),
+
+            "Surge1M":
+                float(
+                    row["Surge1M"]
+                ),
+
+            "DeliveryPercent":
+                float(
+                    row[
+                        "DeliveryPercent"
+                    ]
+                ),
+
+            "VolumeRatio":
+                volume_ratio,
+
+            "FutureReturn":
+                future_return,
+        }
+
+        if future_return >= winner_threshold:
+
+            winners.append(
+                observation
+            )
+
+        elif future_return <= 0:
+
+            losers.append(
+                observation
+            )
+
+    winner_df = pd.DataFrame(
+        winners
+    )
+
+    loser_df = pd.DataFrame(
+        losers
+    )
+
+    if winner_df.empty:
+        return {
+            "error":
+            "No winners found"
+        }
+
+    if loser_df.empty:
+        return {
+            "error":
+            "No losers found"
+        }
+
+    metrics = [
+        "AccumulationScore",
+        "ExplosionScore",
+        "BreakoutScore",
+        "InstitutionalConfidence",
+        "Surge5D",
+        "Surge10D",
+        "Surge30D",
+        "Surge1M",
+        "DeliveryPercent",
+        "VolumeRatio",
+    ]
+
+    winner_stats = {}
+    loser_stats = {}
+
+    for metric in metrics:
+
+        winner_stats[
+            metric
+        ] = round(
+            float(
+                winner_df[
+                    metric
+                ].mean()
+            ),
+            2,
+        )
+
+        loser_stats[
+            metric
+        ] = round(
+            float(
+                loser_df[
+                    metric
+                ].mean()
+            ),
+            2,
+        )
+
+    return {
+        "winner_count":
+            int(
+                len(
+                    winner_df
+                )
+            ),
+
+        "loser_count":
+            int(
+                len(
+                    loser_df
+                )
+            ),
+
+        "winner_threshold":
+            winner_threshold,
+
+        "lookahead_days":
+            lookahead_days,
+
+        "winners":
+            winner_stats,
+
+        "losers":
+            loser_stats,
+    }
 def run_pre_explosion_winner_study(
     raw: pd.DataFrame,
     winner_threshold: float = 15.0,
