@@ -181,6 +181,23 @@ def exploded_filter_optimization(
     ).exploded_filter_optimization(
         days=days
     )
+
+@router.get(
+    "/scanners/exploded-elite"
+)
+def exploded_elite():
+
+    return AnalyticsService(
+    ).exploded_elite()
+
+@router.get(
+    "/scanners/exploded-ultra"
+)
+def exploded_ultra():
+
+    return AnalyticsService(
+    ).exploded_ultra()
+
 @router.post("/ai/ask", response_model=AIAnswer)
 def ask_ai(question: AIQuestion):
     analytics = AnalyticsService()
