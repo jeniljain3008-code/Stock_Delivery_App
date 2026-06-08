@@ -6,7 +6,13 @@ from sqlalchemy.orm import Session
 from ai_engine.analyst import answer_question
 from backend.app.core.security import get_current_user
 from backend.app.db.session import get_db
-from backend.app.schemas import AIAnswer, AIQuestion, BacktestRequest, DashboardSummary
+from backend.app.schemas import (
+    AIAnswer,
+    AIQuestion,
+    BacktestRequest,
+    DashboardSummary,
+    ExplosionBacktestRequest,
+)
 from backend.app.services.analytics_service import AnalyticsService
 from backend.app.services.upload_service import UploadService
 from reports.report_service import build_gold_stocks_excel
@@ -95,8 +101,15 @@ def sector_rotation():
 @router.post("/backtests/run")
 def backtest(request: BacktestRequest):
     return AnalyticsService().backtest(request)
-
-
+    
+@router.post("/backtests/explosion")
+def explosion_backtest(
+    request: ExplosionBacktestRequest,
+):
+    return AnalyticsService().explosion_backtest(
+        request.days,
+    )
+    
 @router.post("/ai/ask", response_model=AIAnswer)
 def ask_ai(question: AIQuestion):
     analytics = AnalyticsService()
