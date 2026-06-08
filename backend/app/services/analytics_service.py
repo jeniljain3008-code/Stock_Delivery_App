@@ -340,6 +340,15 @@ class AnalyticsService:
                         float(row["Close"]),
                         2,
                     ),
+                    "delivery_percent": round(
+                        float(
+                            row.get(
+                                "DeliveryPercent",
+                                0,
+                            )
+                        ),
+                        2,
+                    ),
                     "sector": row.get(
                         "Sector",
                         "Unclassified",
