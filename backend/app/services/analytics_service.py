@@ -410,11 +410,10 @@ class AnalyticsService:
             )
 
         return out
-    
     def explosion_backtest(
             self,
             days: int = 365,
-        ) -> dict:
+    ) -> dict:
 
     db = SessionLocal()
 
