@@ -410,7 +410,29 @@ class AnalyticsService:
             )
 
         return out
-        
+    def pre_explosion_study(
+        self,
+        days: int = 365,
+    ) -> dict:
+
+        db = SessionLocal()
+    
+        try:
+    
+            repo = StockRepository(db)
+    
+            df = repo.get_backtest_dataframe(
+                days=days
+            )
+    
+        finally:
+    
+            db.close()
+
+    return run_pre_explosion_study(
+        df
+    )    
+    
     def explosion_backtest(
         self,
         days: int = 365,
