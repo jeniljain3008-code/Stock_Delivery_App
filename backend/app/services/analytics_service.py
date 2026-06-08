@@ -12,7 +12,12 @@ from analytics.backtesting import (
     run_filtered_exploded_backtest,
     run_exploded_filter_optimization
 )
-from analytics.delivery_engine import compute_delivery_analytics, scan_gold_stocks
+from analytics.delivery_engine import (
+    compute_delivery_analytics, 
+    scan_gold_stocks,
+    scan_exploded_elite,
+    scan_exploded_ultra,
+)
 from analytics.relative_strength import compute_relative_strength
 from analytics.sector_rotation import compute_sector_rotation
 
@@ -550,7 +555,34 @@ class AnalyticsService:
         return run_pre_explosion_study(
             df
         )    
-    
+
+    def exploded_elite(
+        self,
+    ):
+
+        return (
+            scan_exploded_elite(
+                self.demo_df
+            )
+            .head(100)
+            .to_dict(
+                orient="records"
+            )
+        )
+
+    def exploded_ultra(
+        self,
+    ):
+
+        return (
+            scan_exploded_ultra(
+                self.demo_df
+            )
+            .head(100)
+            .to_dict(
+                orient="records"
+            )
+        )
     def explosion_backtest(
         self,
         days: int = 365,
