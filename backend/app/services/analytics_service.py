@@ -413,6 +413,10 @@ class AnalyticsService:
                         ),
                         2,
                     ),
+                    "swing_rank_score": round(
+                        float(row["SwingRankScore"]),
+                        2,
+                    ),
                     "accumulation_score": round(
                         float(
                             row.get(
