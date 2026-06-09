@@ -350,3 +350,53 @@ def scan_exploded_ultra(
         "Surge30D",
         ascending=False,
     )
+
+def scan_ultra_breakout_entries(
+    raw: pd.DataFrame,
+) -> pd.DataFrame:
+
+    ultra = scan_exploded_ultra(
+        raw
+    ).copy()
+
+    if ultra.empty:
+        return ultra
+
+    ultra["VolumeRatio"] = (
+        ultra["Volume"]
+        / ultra["VolumeMA20"]
+    )
+
+    breakout = ultra[
+        (
+            ultra[
+                "SwingRankScore"
+            ]
+            >= 80
+        )
+        &
+        (
+            ultra[
+                "VolumeRatio"
+            ]
+            >= 1.75
+        )
+        &
+        (
+            ultra[
+                "Close"
+            ]
+            >=
+            ultra[
+                "High"
+            ] * 1.01
+        )
+    ].copy()
+
+    return breakout.sort_values(
+        [
+            "SwingRankScore",
+            "Surge30D",
+        ],
+        ascending=False,
+    )
