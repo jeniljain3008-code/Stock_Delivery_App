@@ -39,6 +39,7 @@ class StockRow(BaseModel):
 
     risk_rating: str
     swing_signal: str
+    swing_rank_score: float | None = 0
     
     
 class DashboardSummary(BaseModel):
