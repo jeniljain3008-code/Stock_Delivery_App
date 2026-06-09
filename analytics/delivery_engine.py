@@ -66,6 +66,24 @@ def compute_delivery_analytics(raw: pd.DataFrame) -> pd.DataFrame:
             + (df["Surge10D"] * 0.30)
             + (df["Surge30D"] * 0.20)
         )
+
+    df["SwingRankScore"] = (
+    
+            (df["Surge30D"] / 5 * 40)
+        
+            +
+        
+            (df["DeliveryPercent"] / 100 * 30)
+        
+            +
+        
+            (df["Surge10D"] / 5 * 20)
+        
+            +
+        
+            (df["ExplosionScore"] / 6 * 10)
+    
+        )
     df["DMA20"] = groups["Close"].transform(lambda s: s.rolling(20, min_periods=1).mean())
     df["DMA50"] = groups["Close"].transform(lambda s: s.rolling(50, min_periods=1).mean())
     df["DMA200"] = groups["Close"].transform(lambda s: s.rolling(200, min_periods=1).mean())
