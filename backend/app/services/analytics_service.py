@@ -17,6 +17,7 @@ from analytics.delivery_engine import (
     scan_gold_stocks,
     scan_exploded_elite,
     scan_exploded_ultra,
+    scan_ultra_breakout_entries
 )
 from analytics.relative_strength import compute_relative_strength
 from analytics.sector_rotation import compute_sector_rotation
@@ -82,10 +83,16 @@ class AnalyticsService:
                 "kpis": [],
                 "top_delivery_surge": [],
                 "top_breakouts": [],
+                "exploded_stocks": [],
+                "exploded_elite": [],
+                "exploded_ultra": [],
+                "breakout_entries": [],
+                "ready_to_explode": [],
+                "preparing_to_explode": [],
                 "sector_leaders": [],
                 "market_summary": "No data uploaded yet.",
             }
-
+            
         analytics = compute_delivery_analytics(self.demo_df)
 
         latest = (
@@ -199,6 +206,9 @@ class AnalyticsService:
 
             "exploded_ultra":
                 self.exploded_ultra(),
+            
+            "breakout_entries":
+                self.ultra_breakout_entries(),
 
             "ready_to_explode": self._rows(
                 ready_to_explode
@@ -616,6 +626,16 @@ class AnalyticsService:
 
         return self._rows(
             scan_exploded_ultra(
+                self.demo_df
+            ).head(100)
+        )
+
+    def ultra_breakout_entries(
+        self,
+    ):
+
+        return self._rows(
+            scan_ultra_breakout_entries(
                 self.demo_df
             ).head(100)
         )
