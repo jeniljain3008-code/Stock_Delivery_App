@@ -214,6 +214,40 @@ def scan_gold_stocks(raw: pd.DataFrame) -> pd.DataFrame:
         ]
     ].rename(columns={"Symbol": "symbol"})
 
+def remove_etfs(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
+
+    etf_keywords = [
+        "ETF",
+        "BEES",
+        "GOLD",
+        "SILVER",
+        "LIQUID",
+        "NIFTY",
+        "SENSEX",
+        "BANKBEES",
+        "PSUBNK",
+        "CPSE",
+        "MON100",
+        "MAFANG",
+        "ITBEES",
+        "PHARMABEES",
+    ]
+
+    mask = (
+        df["Symbol"]
+        .astype(str)
+        .str.upper()
+        .str.contains(
+            "|".join(etf_keywords),
+            na=False,
+        )
+    )
+
+    return df[
+        ~mask
+    ].copy()
 def scan_exploded_elite(
     raw: pd.DataFrame,
 ) -> pd.DataFrame:
