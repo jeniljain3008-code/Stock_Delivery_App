@@ -1,3 +1,4 @@
+import CollapsibleSection from "@/components/collapsible-section";
 import { ApiErrorNotice } from "@/components/api-error";
 import { KpiCard } from "@/components/kpi-card";
 import { StockTable, type StockRow } from "@/components/stock-table";
@@ -79,51 +80,53 @@ export default async function Dashboard() {
           <StockTable rows={data.top_breakouts} />
         </div>
       </section>
-      <section className="space-y-8">
+      <section className="space-y-6">
       
-        <div>
-          <h3 className="mb-3 text-xl font-semibold">
-            🚀 Exploded Stocks
-          </h3>
-      
-          <StockTable
-            rows={data.exploded_stocks}
-          />
-        </div>
-        <div>
-          <h3 className="mb-3 text-xl font-semibold">
-            ⭐ Exploded Elite
-          </h3>
-          <StockTable rows={data.exploded_elite ?? []} />
-        </div>
-
-        <div>
-            <h3 className="mb-3 text-xl font-semibold">
-              💎 Exploded Ultra
-            </h3>
+            <CollapsibleSection
+              title={`🚀 Exploded Stocks (${data.exploded_stocks?.length ?? 0})`}
+              defaultOpen={true}
+            >
+              <StockTable
+                rows={data.exploded_stocks}
+              />
+            </CollapsibleSection>
           
-            <StockTable rows={data.exploded_ultra ?? []} />
-        </div>
-        <div>
-          <h3 className="mb-3 text-xl font-semibold">
-            🔥 Ready To Explode
-          </h3>
-      
-          <StockTable
-            rows={data.ready_to_explode}
-          />
-        </div>
-      
-        <div>
-          <h3 className="mb-3 text-xl font-semibold">
-            👀 Preparing To Explode
-          </h3>
-      
-          <StockTable
-            rows={data.preparing_to_explode}
-          />
-        </div>
-      
+            <CollapsibleSection
+              title={`⭐ Exploded Elite (${data.exploded_elite?.length ?? 0})`}
+              defaultOpen={true}
+            >
+              <StockTable
+                rows={data.exploded_elite ?? []}
+              />
+            </CollapsibleSection>
+          
+            <CollapsibleSection
+              title={`💎 Exploded Ultra (${data.exploded_ultra?.length ?? 0})`}
+              defaultOpen={true}
+            >
+              <StockTable
+                rows={data.exploded_ultra ?? []}
+              />
+            </CollapsibleSection>
+          
+            <CollapsibleSection
+              title={`🔥 Ready To Explode (${data.ready_to_explode?.length ?? 0})`}
+              defaultOpen={false}
+            >
+              <StockTable
+                rows={data.ready_to_explode}
+              />
+            </CollapsibleSection>
+          
+            <CollapsibleSection
+              title={`👀 Preparing To Explode (${data.preparing_to_explode?.length ?? 0})`}
+              defaultOpen={false}
+            >
+              <StockTable
+                rows={data.preparing_to_explode}
+              />
+            </CollapsibleSection>
+          
       </section>
       <section className="rounded-2xl border border-border bg-card p-5">
         <h3 className="text-xl font-semibold">Market Summary</h3>
