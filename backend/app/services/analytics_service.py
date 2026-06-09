@@ -24,6 +24,10 @@ from analytics.sector_rotation import compute_sector_rotation
 from backend.app.db.session import SessionLocal
 from backend.app.repositories.stocks import StockRepository
 
+from analytics.delivery_engine import (
+    remove_etfs,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,6 +42,9 @@ class AnalyticsService:
                 self.demo_df = (
                     StockRepository(db)
                     .get_all_prices_dataframe()
+                )
+                self.demo_df = remove_etfs(
+                    self.demo_df
                 )
 
             finally:
