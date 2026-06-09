@@ -19,7 +19,7 @@ type DashboardSummary = {
   exploded_stocks: StockRow[];
   exploded_elite: StockRow[];
   exploded_ultra: StockRow[];
-
+  breakout_entries: StockRow[];
   ready_to_explode: StockRow[];
   preparing_to_explode: StockRow[];
 
@@ -40,6 +40,7 @@ const fallbackDashboard: DashboardSummary = {
   exploded_stocks: [],
   exploded_elite: [],
   exploded_ultra: [],
+  breakout_entries: [],
   ready_to_explode: [],
   preparing_to_explode: [],
 
@@ -90,7 +91,15 @@ export default async function Dashboard() {
                 rows={data.exploded_stocks}
               />
             </CollapsibleSection>
-          
+
+            <CollapsibleSection
+                title={`🚀 Ultra Breakout Entries (${data.breakout_entries?.length ?? 0})`}
+                defaultOpen={true}
+              >
+                <StockTable
+                  rows={data.breakout_entries ?? []}
+                />
+            </CollapsibleSection>
             <CollapsibleSection
               title={`⭐ Exploded Elite (${data.exploded_elite?.length ?? 0})`}
               defaultOpen={true}
