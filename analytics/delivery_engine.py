@@ -389,7 +389,7 @@ def scan_ultra_breakout_entries(
             >=
             ultra[
                 "High"
-            ] * 1.01
+            ] * 0.99
         )
     ].copy()
 
