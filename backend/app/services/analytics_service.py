@@ -582,10 +582,21 @@ class AnalyticsService:
         self,
     ):
 
-        return self._rows(
-            scan_exploded_elite(
+        elite = scan_exploded_elite(
                 self.demo_df
-            ).head(100)
+        )
+        
+        print(
+            elite[
+                [
+                    "Symbol",
+                    "DeliveryPercent"
+                ]
+            ].head(10)
+        )
+        
+        return self._rows(
+            elite.head(100)
         )
 
     def exploded_ultra(
