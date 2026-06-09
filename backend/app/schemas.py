@@ -51,6 +51,7 @@ class DashboardSummary(BaseModel):
     exploded_stocks: list[StockRow]
     exploded_elite: list[StockRow]
     exploded_ultra: list[StockRow]
+    breakout_entries: list[StockRow]
     ready_to_explode: list[StockRow]
     preparing_to_explode: list[StockRow]
 
