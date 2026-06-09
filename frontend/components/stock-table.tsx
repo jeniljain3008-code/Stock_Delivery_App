@@ -29,6 +29,7 @@ export function StockTable({
 }: {
   rows: StockRow[];
 }) {
+  console.log(rows[0]);
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <table className="w-full text-sm">
