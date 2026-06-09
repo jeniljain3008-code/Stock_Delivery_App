@@ -1,3 +1,10 @@
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
 export type StockRow = {
   symbol: string;
 
@@ -8,7 +15,7 @@ export type StockRow = {
   delivery_surge: number;
 
   delivery_percent?: number;
-  
+
   surge_5d?: number;
   surge_10d?: number;
   surge_30d?: number;
@@ -29,55 +36,238 @@ export function StockTable({
 }: {
   rows: StockRow[];
 }) {
-  console.log(rows[0]);
+
+  const [
+    sortField,
+    setSortField,
+  ] = useState<keyof StockRow>(
+    "surge_30d"
+  );
+
+  const [
+    sortDirection,
+    setSortDirection,
+  ] = useState<"asc" | "desc">(
+    "desc"
+  );
+
+  const handleSort = (
+    field: keyof StockRow
+  ) => {
+
+    if (
+      sortField === field
+    ) {
+
+      setSortDirection(
+        sortDirection === "asc"
+          ? "desc"
+          : "asc"
+      );
+
+      return;
+    }
+
+    setSortField(
+      field
+    );
+
+    setSortDirection(
+      "desc"
+    );
+  };
+
+  const sortedRows =
+    useMemo(() => {
+
+      return [...rows].sort(
+        (a, b) => {
+
+          const aVal =
+            a[sortField] ?? 0;
+
+          const bVal =
+            b[sortField] ?? 0;
+
+          if (
+            typeof aVal ===
+              "string" &&
+            typeof bVal ===
+              "string"
+          ) {
+
+            return sortDirection ===
+              "asc"
+              ? aVal.localeCompare(
+                  bVal
+                )
+              : bVal.localeCompare(
+                  aVal
+                );
+          }
+
+          return sortDirection ===
+            "asc"
+            ? Number(aVal) -
+                Number(bVal)
+            : Number(bVal) -
+                Number(aVal);
+        }
+      );
+
+    }, [
+      rows,
+      sortField,
+      sortDirection,
+    ]);
+
+  const arrow = (
+    field: keyof StockRow
+  ) => {
+
+    if (
+      sortField !== field
+    )
+      return "";
+
+    return sortDirection ===
+      "asc"
+      ? " ↑"
+      : " ↓";
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <table className="w-full text-sm">
+
         <thead className="bg-white/5 text-left text-slate-400">
           <tr>
-            <th className="p-3">
+
+            <th
+              className="p-3 cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "symbol"
+                )
+              }
+            >
               Symbol
+              {arrow("symbol")}
             </th>
 
-            <th>
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "close"
+                )
+              }
+            >
               Price
+              {arrow("close")}
             </th>
 
-            <th>
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "delivery_percent"
+                )
+              }
+            >
               Del %
-            </th>  
-            <th>
+              {arrow(
+                "delivery_percent"
+              )}
+            </th>
+
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "surge_5d"
+                )
+              }
+            >
               5D
+              {arrow("surge_5d")}
             </th>
 
-            <th>
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "surge_10d"
+                )
+              }
+            >
               10D
+              {arrow("surge_10d")}
             </th>
 
-            <th>
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "surge_30d"
+                )
+              }
+            >
               30D
+              {arrow("surge_30d")}
             </th>
 
-            <th>
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "explosion_score"
+                )
+              }
+            >
               Score
+              {arrow(
+                "explosion_score"
+              )}
             </th>
 
-            <th>
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "accumulation_score"
+                )
+              }
+            >
               Accumulation
+              {arrow(
+                "accumulation_score"
+              )}
             </th>
 
             <th>
               Signal
             </th>
 
-            <th>
+            <th
+              className="cursor-pointer"
+              onClick={() =>
+                handleSort(
+                  "risk_rating"
+                )
+              }
+            >
               Risk
+              {arrow(
+                "risk_rating"
+              )}
             </th>
+
           </tr>
         </thead>
 
         <tbody>
-          {rows.map(
+          {sortedRows.map(
             (row) => (
               <tr
                 key={
@@ -95,18 +285,17 @@ export function StockTable({
                 </td>
 
                 <td>
-                    {(
-                      row.delivery_percent ??
-                      0
-                    ).toFixed(1)}
+                  {(
+                    row.delivery_percent ??
+                    0
+                  ).toFixed(1)}
                 </td>
+
                 <td>
                   {(
                     row.surge_5d ??
                     0
-                  ).toFixed(
-                    2
-                  )}
+                  ).toFixed(2)}
                   x
                 </td>
 
@@ -114,9 +303,7 @@ export function StockTable({
                   {(
                     row.surge_10d ??
                     0
-                  ).toFixed(
-                    2
-                  )}
+                  ).toFixed(2)}
                   x
                 </td>
 
@@ -124,9 +311,7 @@ export function StockTable({
                   {(
                     row.surge_30d ??
                     0
-                  ).toFixed(
-                    2
-                  )}
+                  ).toFixed(2)}
                   x
                 </td>
 
@@ -134,34 +319,28 @@ export function StockTable({
                   {(
                     row.explosion_score ??
                     0
-                  ).toFixed(
-                    2
-                  )}
+                  ).toFixed(2)}
                 </td>
 
                 <td>
-                  {
-                    row.accumulation_score
-                  }
+                  {row.accumulation_score}
                 </td>
 
                 <td>
                   <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-emerald-300">
-                    {
-                      row.swing_signal
-                    }
+                    {row.swing_signal}
                   </span>
                 </td>
 
                 <td>
-                  {
-                    row.risk_rating
-                  }
+                  {row.risk_rating}
                 </td>
+
               </tr>
             )
           )}
         </tbody>
+
       </table>
     </div>
   );
