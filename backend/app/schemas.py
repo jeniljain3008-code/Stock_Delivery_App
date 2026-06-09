@@ -26,6 +26,7 @@ class StockRow(BaseModel):
     market_cap: str | None = None
 
     delivery_surge: float
+    delivery_percent: float | None = None
 
     surge_5d: float = 0
     surge_10d: float = 0
@@ -39,6 +40,7 @@ class StockRow(BaseModel):
     risk_rating: str
     swing_signal: str
     
+    
 class DashboardSummary(BaseModel):
     kpis: list[KPI]
 
@@ -46,6 +48,8 @@ class DashboardSummary(BaseModel):
     top_breakouts: list[StockRow]
 
     exploded_stocks: list[StockRow]
+    exploded_elite: list[StockRow]
+    exploded_ultra: list[StockRow]
     ready_to_explode: list[StockRow]
     preparing_to_explode: list[StockRow]
 
