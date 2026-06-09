@@ -332,7 +332,12 @@ class AnalyticsService:
         for row in df.to_dict(
             orient="records"
         ):
-
+            print(
+                "DeliveryPercent:",
+                row.get(
+                    "DeliveryPercent"
+                )
+            )
             out.append(
                 {
                     "symbol": row["Symbol"],
