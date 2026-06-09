@@ -29,6 +29,7 @@ export type StockRow = {
   risk_rating: string;
 
   swing_signal: string;
+  swing_rank_score?: number;
 };
 
 export function StockTable({
@@ -41,7 +42,7 @@ export function StockTable({
     sortField,
     setSortField,
   ] = useState<keyof StockRow>(
-    "surge_30d"
+    "swing_rank_score"
   );
 
   const [
@@ -284,6 +285,19 @@ export function StockTable({
                 30D
                 {arrow("surge_30d")}
               </th>
+              <th
+                className="cursor-pointer"
+                onClick={() =>
+                  handleSort(
+                    "swing_rank_score"
+                  )
+                }
+              >
+                Rank
+                {arrow(
+                  "swing_rank_score"
+                )}
+              </th>
 
               <th
                 className="cursor-pointer"
@@ -382,7 +396,12 @@ export function StockTable({
                     ).toFixed(2)}
                     x
                   </td>
-
+                  <td>
+                      {(
+                        row.swing_rank_score ??
+                        0
+                      ).toFixed(1)}
+                  </td>
                   <td>
                     {(
                       row.explosion_score ??
