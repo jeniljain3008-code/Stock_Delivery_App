@@ -7,7 +7,7 @@ export type StockRow = {
 
   delivery_surge: number;
 
-  DeliveryPercent?: number;
+  delivery_percent?: number;
   
   surge_5d?: number;
   surge_10d?: number;
@@ -96,7 +96,7 @@ export function StockTable({
 
                 <td>
                     {(
-                      row.DeliveryPercent ??
+                      row.delivery_percent ??
                       0
                     ).toFixed(1)}
                 </td>
