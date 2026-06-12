@@ -28,6 +28,9 @@ from backend.app.repositories.stocks import StockRepository
 from analytics.delivery_engine import (
     remove_etfs,
 )
+from backend.app.services.ultra_signal_service import (
+    register_ultra_signals,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -619,17 +622,30 @@ class AnalyticsService:
         return self._rows(
             elite.head(100)
         )
-
     def exploded_ultra(
         self,
     ):
 
-        return self._rows(
-            scan_exploded_ultra(
-                self.demo_df
-            ).head(100)
+        ultra = scan_exploded_ultra(
+            self.demo_df
         )
-
+    
+        db = SessionLocal()
+    
+        try:
+    
+            register_ultra_signals(
+                db,
+                ultra,
+            )
+    
+        finally:
+    
+            db.close()
+    
+        return self._rows(
+            ultra.head(100)
+        )
     def ultra_breakout_entries(
         self,
     ):
