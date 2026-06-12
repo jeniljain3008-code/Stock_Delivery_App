@@ -40,7 +40,11 @@ class StockRow(BaseModel):
     risk_rating: str
     swing_signal: str
     swing_rank_score: float | None = 0
-    
+    entry_price: float | None = None
+    current_price: float | None = None
+    return_pct: float | None = None
+    days_active: int | None = None
+    breakout_date: str | None = None
     
 class DashboardSummary(BaseModel):
     kpis: list[KPI]
@@ -52,6 +56,7 @@ class DashboardSummary(BaseModel):
     exploded_elite: list[StockRow]
     exploded_ultra: list[StockRow]
     breakout_entries: list[StockRow]
+    ultra_breakout_tracker: list[StockRow]
     ready_to_explode: list[StockRow]
     preparing_to_explode: list[StockRow]
 
