@@ -27,8 +27,7 @@ def get_ultra_breakout_tracker(
 
     latest_lookup = {
         row["Symbol"]: row
-        for _, row
-        in latest_df.iterrows()
+        for _, row in latest_df.iterrows()
     }
 
     tracker_rows = []
@@ -42,61 +41,71 @@ def get_ultra_breakout_tracker(
         if stock is None:
             continue
 
-        current_close = float(
+        current_price = float(
             stock["Close"]
         )
 
-        breakout_close = float(
-            signal.breakout_close
+        entry_price = float(
+            signal.breakout_close or 0
         )
 
-        return_pct = round(
+        if entry_price <= 0:
+            continue
+
+        return_pct = (
             (
-                (
-                    current_close
-                    -
-                    breakout_close
-                )
-                /
-                breakout_close
+                current_price
+                - entry_price
             )
-            * 100,
-            2,
-        )
+            / entry_price
+        ) * 100
 
         days_active = (
             date.today()
-            -
-            signal.breakout_date
+            - signal.breakout_date
         ).days
 
         tracker_rows.append(
             {
                 "symbol": signal.symbol,
-        
+
                 "breakout_date":
-                    str(signal.breakout_date),
-        
+                    str(
+                        signal.breakout_date
+                    ),
+
                 "entry_price":
-                    round(signal.entry_price, 2),
-        
+                    round(
+                        entry_price,
+                        2,
+                    ),
+
                 "current_price":
-                    round(signal.current_price, 2),
-        
+                    round(
+                        current_price,
+                        2,
+                    ),
+
                 "return_pct":
-                    round(signal.return_pct, 2),
-        
+                    round(
+                        return_pct,
+                        2,
+                    ),
+
                 "days_active":
-                    signal.days_active,
-        
+                    days_active,
+
                 "swing_rank_score":
                     round(
-                        signal.swing_rank_score,
+                        float(
+                            signal.swing_rank_score
+                            or 0
+                        ),
                         2,
                     ),
             }
         )
-        
+
     return pd.DataFrame(
         tracker_rows
     )
