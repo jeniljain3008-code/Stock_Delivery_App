@@ -96,6 +96,7 @@ class AnalyticsService:
                 "exploded_elite": [],
                 "exploded_ultra": [],
                 "breakout_entries": [],
+                "ultra_breakout_tracker": [],
                 "ready_to_explode": [],
                 "preparing_to_explode": [],
                 "sector_leaders": [],
@@ -218,6 +219,9 @@ class AnalyticsService:
             
             "breakout_entries":
                 self.ultra_breakout_entries(),
+            
+            "ultra_breakout_tracker":
+                self.ultra_breakout_tracker(),
 
             "ready_to_explode": self._rows(
                 ready_to_explode
@@ -613,7 +617,9 @@ class AnalyticsService:
     ):
 
         elite = scan_exploded_elite(
+            remove_etfs(
                 self.demo_df
+            )
         )
         
         print(
@@ -633,7 +639,9 @@ class AnalyticsService:
     ):
 
         ultra = scan_exploded_ultra(
-            self.demo_df
+            remove_etfs(
+                self.demo_df
+            )
         )
     
         db = SessionLocal()
@@ -679,6 +687,9 @@ class AnalyticsService:
             /
             latest["VolumeMA20"]
         )
+        latest = remove_etfs(
+            latest
+        )
         
         db = SessionLocal()
     
@@ -718,6 +729,9 @@ class AnalyticsService:
                 "Symbol"
             )
             .tail(1)
+        )
+        latest = remove_etfs(
+            latest
         )
     
         db = SessionLocal()
