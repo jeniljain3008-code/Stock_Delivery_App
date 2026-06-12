@@ -78,16 +78,16 @@ def get_ultra_breakout_tracker(
                     str(signal.breakout_date),
         
                 "entry_price":
-                    round(entry_price, 2),
+                    round(signal.entry_price, 2),
         
                 "current_price":
-                    round(current_price, 2),
+                    round(signal.current_price, 2),
         
                 "return_pct":
-                    round(return_pct, 2),
+                    round(signal.return_pct, 2),
         
                 "days_active":
-                    days_active,
+                    signal.days_active,
         
                 "swing_rank_score":
                     round(
