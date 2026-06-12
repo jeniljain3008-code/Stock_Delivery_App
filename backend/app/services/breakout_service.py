@@ -4,6 +4,14 @@ from backend.app.db.models import (
     UltraSignal,
 )
 
+# ==========================================
+# Ultra Breakout Thresholds
+# ==========================================
+
+ULTRA_BREAKOUT_MIN_VOLUME_RATIO = 1.25
+
+ULTRA_BREAKOUT_MIN_RANK = 80
+
 
 def get_actual_ultra_breakouts(
     db,
@@ -48,7 +56,39 @@ def get_actual_ultra_breakouts(
             signal.signal_high
         )
 
-        if latest_close > signal_high:
+        volume_ratio = float(
+            stock.get(
+                "VolumeRatio",
+                0,
+            )
+        )
+
+        swing_rank_score = float(
+            stock.get(
+                "SwingRankScore",
+                0,
+            )
+        )
+
+        breakout_condition = (
+
+            latest_close > signal_high
+
+            and
+
+            volume_ratio
+            >
+            ULTRA_BREAKOUT_MIN_VOLUME_RATIO
+
+            and
+
+            swing_rank_score
+            >
+            ULTRA_BREAKOUT_MIN_RANK
+
+        )
+
+        if breakout_condition:
 
             breakout_rows.append(
                 stock
@@ -72,6 +112,16 @@ def get_actual_ultra_breakouts(
 
         return pd.DataFrame()
 
-    return pd.DataFrame(
+    breakout_df = pd.DataFrame(
         breakout_rows
     )
+
+    breakout_df = (
+        breakout_df
+        .sort_values(
+            "SwingRankScore",
+            ascending=False,
+        )
+    )
+
+    return breakout_df
