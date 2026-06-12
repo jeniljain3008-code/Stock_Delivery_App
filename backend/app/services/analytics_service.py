@@ -31,6 +31,9 @@ from analytics.delivery_engine import (
 from backend.app.services.ultra_signal_service import (
     register_ultra_signals,
 )
+from backend.app.services.breakout_service import (
+    get_actual_ultra_breakouts,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -650,10 +653,40 @@ class AnalyticsService:
         self,
     ):
 
-        return self._rows(
-            scan_ultra_breakout_entries(
+        analytics = (
+            compute_delivery_analytics(
                 self.demo_df
-            ).head(100)
+            )
+        )
+    
+        latest = (
+            analytics
+            .sort_values(
+                "Date"
+            )
+            .groupby(
+                "Symbol"
+            )
+            .tail(1)
+        )
+    
+        db = SessionLocal()
+    
+        try:
+    
+            breakout_df = (
+                get_actual_ultra_breakouts(
+                    db,
+                    latest,
+                )
+            )
+    
+        finally:
+    
+            db.close()
+    
+        return self._rows(
+            breakout_df.head(100)
         )
     def explosion_backtest(
         self,
