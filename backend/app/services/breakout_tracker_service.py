@@ -98,8 +98,10 @@ def get_ultra_breakout_tracker(
                 "swing_rank_score":
                     round(
                         float(
-                            signal.swing_rank_score
-                            or 0
+                            stock.get(
+                                "SwingRankScore",
+                                0,
+                            )
                         ),
                         2,
                     ),
