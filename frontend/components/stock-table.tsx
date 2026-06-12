@@ -30,6 +30,11 @@ export type StockRow = {
 
   swing_signal: string;
   swing_rank_score?: number;
+  entry_price?: number;
+  current_price?: number;
+  return_pct?: number;
+  days_active?: number;
+  breakout_date?: string;
 };
 
 export function StockTable({
