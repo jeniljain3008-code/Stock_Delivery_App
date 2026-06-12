@@ -89,3 +89,72 @@ class AnalyticsSnapshot(Base):
     risk_rating: Mapped[str] = mapped_column(String, nullable=False)
     potential_upside: Mapped[float | None] = mapped_column(Numeric(7, 3))
     label: Mapped[str] = mapped_column(String, nullable=False)
+    
+class UltraSignal(Base):
+
+    __tablename__ = "ultra_signal_registry"
+    __table_args__ = (
+        UniqueConstraint(
+            "symbol",
+            "signal_date",
+            name="uq_ultra_signal"
+        ),
+    )
+
+    id: Mapped[PyUUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+    )
+
+    symbol: Mapped[str] = mapped_column(
+        String,
+        index=True,
+        nullable=False,
+    )
+
+    signal_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+        index=True,
+    )
+
+    signal_high: Mapped[float] = mapped_column(
+        Numeric(14, 4),
+        nullable=False,
+    )
+
+    signal_close: Mapped[float] = mapped_column(
+        Numeric(14, 4),
+        nullable=False,
+    )
+
+    signal_rank: Mapped[float] = mapped_column(
+        Numeric(8, 2),
+        nullable=False,
+    )
+
+    delivery_percent: Mapped[float] = mapped_column(
+        Numeric(8, 2),
+        nullable=False,
+    )
+
+    breakout_date: Mapped[date | None] = mapped_column(
+        Date,
+        nullable=True,
+    )
+
+    breakout_close: Mapped[float | None] = mapped_column(
+        Numeric(14, 4),
+        nullable=True,
+    )
+
+    is_breakout: Mapped[bool] = mapped_column(
+        default=False,
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
