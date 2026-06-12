@@ -658,7 +658,7 @@ class AnalyticsService:
                 self.demo_df
             )
         )
-    
+
         latest = (
             analytics
             .sort_values(
@@ -668,8 +668,15 @@ class AnalyticsService:
                 "Symbol"
             )
             .tail(1)
+            .copy()
         )
-    
+        
+        latest["VolumeRatio"] = (
+            latest["Volume"]
+            /
+            latest["VolumeMA20"]
+        )
+        
         db = SessionLocal()
     
         try:
