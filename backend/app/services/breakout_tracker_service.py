@@ -72,32 +72,31 @@ def get_ultra_breakout_tracker(
 
         tracker_rows.append(
             {
-                "Symbol":
-                    signal.symbol,
-
-                "BreakoutDate":
-                    signal.breakout_date,
-
-                "EntryPrice":
-                    breakout_close,
-
-                "CurrentPrice":
-                    current_close,
-
-                "ReturnPct":
-                    return_pct,
-
-                "DaysActive":
+                "symbol": signal.symbol,
+        
+                "breakout_date":
+                    str(signal.breakout_date),
+        
+                "entry_price":
+                    round(entry_price, 2),
+        
+                "current_price":
+                    round(current_price, 2),
+        
+                "return_pct":
+                    round(return_pct, 2),
+        
+                "days_active":
                     days_active,
-
-                "SwingRankScore":
-                    stock.get(
-                        "SwingRankScore",
-                        0,
+        
+                "swing_rank_score":
+                    round(
+                        signal.swing_rank_score,
+                        2,
                     ),
             }
         )
-
+        
     return pd.DataFrame(
         tracker_rows
     )
