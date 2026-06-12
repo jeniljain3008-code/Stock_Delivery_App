@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
+from backend.app.db.session import SessionLocal
 from ai_engine.analyst import answer_question
 from backend.app.core.security import get_current_user
 from backend.app.db.session import get_db
