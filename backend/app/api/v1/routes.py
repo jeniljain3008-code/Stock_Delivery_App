@@ -13,6 +13,9 @@ from backend.app.schemas import (
     DashboardSummary,
     ExplosionBacktestRequest,
 )
+from backend.app.services.ultra_backfill_service import (
+    backfill_ultra_signals,
+)
 from backend.app.services.analytics_service import AnalyticsService
 from backend.app.services.upload_service import UploadService
 from reports.report_service import build_gold_stocks_excel
@@ -210,7 +213,33 @@ def ask_ai(question: AIQuestion):
 def gold_stock_report():
     return build_gold_stocks_excel(AnalyticsService().gold_stocks())
 
+@router.post(
+    "/ultra/backfill"
+)
+def ultra_backfill(
+    days: int = 30,
+):
 
+    db = SessionLocal()
+
+    try:
+
+        service = (
+            AnalyticsService()
+        )
+
+        return (
+            backfill_ultra_signals(
+                db=db,
+                raw_df=
+                service.demo_df,
+                days=days,
+            )
+        )
+
+    finally:
+
+        db.close()
 @router.post("/jobs/daily-refresh")
 def daily_refresh():
     return {
