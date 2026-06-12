@@ -3,10 +3,23 @@ import { ApiErrorNotice } from "@/components/api-error";
 import { KpiCard } from "@/components/kpi-card";
 import { StockTable, type StockRow } from "@/components/stock-table";
 import { apiGetOrFallback } from "@/lib/api";
-import BreakoutTrackerTable
-from "@/components/breakout-tracker-table";
+import UltraBreakoutTracker from "@/components/ultra-breakout-tracker";
 
 export const dynamic = "force-dynamic";
+
+type UltraBreakoutTrackerRow = {
+  symbol: string;
+
+  breakout_date: string;
+
+  entry_price: number;
+
+  current_price: number;
+
+  return_pct: number;
+
+  days_active: number;
+};
 
 type DashboardSummary = {
   kpis: Array<{
@@ -21,8 +34,11 @@ type DashboardSummary = {
   exploded_stocks: StockRow[];
   exploded_elite: StockRow[];
   exploded_ultra: StockRow[];
+
   breakout_entries: StockRow[];
-  ultra_breakout_tracker: StockRow[];
+
+  ultra_breakout_tracker: UltraBreakoutTrackerRow[];
+
   ready_to_explode: StockRow[];
   preparing_to_explode: StockRow[];
 
@@ -31,10 +47,22 @@ type DashboardSummary = {
 
 const fallbackDashboard: DashboardSummary = {
   kpis: [
-    { label: "Total Stocks Analyzed", value: 0 },
-    { label: "Stocks in Accumulation", value: 0 },
-    { label: "Stocks in Distribution", value: 0 },
-    { label: "Gold Stock Candidates", value: 0 },
+    {
+      label: "Total Stocks Analyzed",
+      value: 0,
+    },
+    {
+      label: "Stocks in Accumulation",
+      value: 0,
+    },
+    {
+      label: "Stocks in Distribution",
+      value: 0,
+    },
+    {
+      label: "Gold Stock Candidates",
+      value: 0,
+    },
   ],
 
   top_delivery_surge: [],
@@ -43,8 +71,10 @@ const fallbackDashboard: DashboardSummary = {
   exploded_stocks: [],
   exploded_elite: [],
   exploded_ultra: [],
+
   breakout_entries: [],
   ultra_breakout_tracker: [],
+
   ready_to_explode: [],
   preparing_to_explode: [],
 
@@ -126,13 +156,12 @@ export default async function Dashboard() {
                 title={`📅 Ultra Breakout Tracker (${data.ultra_breakout_tracker?.length ?? 0})`}
                 defaultOpen={true}
               >
-              
-                <BreakoutTrackerTable
-                  rows={
-                    data.ultra_breakout_tracker ?? []
-                  }
+
+             <UltraBreakoutTracker
+                rows={
+                  data.ultra_breakout_tracker ?? []
+                }
             />
-          
           </CollapsibleSection> 
             <CollapsibleSection
               title={`🔥 Ready To Explode (${data.ready_to_explode?.length ?? 0})`}
