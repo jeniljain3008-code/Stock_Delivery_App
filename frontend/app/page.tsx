@@ -3,6 +3,8 @@ import { ApiErrorNotice } from "@/components/api-error";
 import { KpiCard } from "@/components/kpi-card";
 import { StockTable, type StockRow } from "@/components/stock-table";
 import { apiGetOrFallback } from "@/lib/api";
+import BreakoutTrackerTable
+from "@/components/breakout-tracker-table";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,7 @@ type DashboardSummary = {
   exploded_elite: StockRow[];
   exploded_ultra: StockRow[];
   breakout_entries: StockRow[];
+  ultra_breakout_tracker: StockRow[];
   ready_to_explode: StockRow[];
   preparing_to_explode: StockRow[];
 
@@ -41,6 +44,7 @@ const fallbackDashboard: DashboardSummary = {
   exploded_elite: [],
   exploded_ultra: [],
   breakout_entries: [],
+  ultra_breakout_tracker: [],
   ready_to_explode: [],
   preparing_to_explode: [],
 
@@ -117,7 +121,19 @@ export default async function Dashboard() {
                 rows={data.exploded_ultra ?? []}
               />
             </CollapsibleSection>
+
+           <CollapsibleSection
+                title={`📅 Ultra Breakout Tracker (${data.ultra_breakout_tracker?.length ?? 0})`}
+                defaultOpen={true}
+              >
+              
+                <BreakoutTrackerTable
+                  rows={
+                    data.ultra_breakout_tracker ?? []
+                  }
+            />
           
+          </CollapsibleSection> 
             <CollapsibleSection
               title={`🔥 Ready To Explode (${data.ready_to_explode?.length ?? 0})`}
               defaultOpen={false}
