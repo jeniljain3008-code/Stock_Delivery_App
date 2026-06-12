@@ -56,7 +56,9 @@ class DashboardSummary(BaseModel):
     exploded_elite: list[StockRow]
     exploded_ultra: list[StockRow]
     breakout_entries: list[StockRow]
-    ultra_breakout_tracker: list[StockRow]
+    ultra_breakout_tracker: list[
+        UltraBreakoutTrackerRow
+    ]
     ready_to_explode: list[StockRow]
     preparing_to_explode: list[StockRow]
 
@@ -100,3 +102,19 @@ class BacktestResult(BaseModel):
     
 class ExplosionBacktestRequest(BaseModel):
     days: int = 365
+
+class UltraBreakoutTrackerRow(BaseModel):
+
+    symbol: str
+
+    breakout_date: str
+
+    entry_price: float
+
+    current_price: float
+
+    return_pct: float
+
+    days_active: int
+
+    swing_rank_score: float
