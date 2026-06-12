@@ -3,7 +3,7 @@ from datetime import timedelta
 from sqlalchemy.orm import Session
 
 from backend.app.db.models import UltraSignal
-from backend.app.services.delivery_engine import (
+from analytics.delivery_engine import (
     compute_delivery_analytics,
     remove_etfs,
 )
