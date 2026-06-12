@@ -45,6 +45,22 @@ class StockRow(BaseModel):
     return_pct: float | None = None
     days_active: int | None = None
     breakout_date: str | None = None
+
+class UltraBreakoutTrackerRow(BaseModel):
+
+    symbol: str
+
+    breakout_date: str
+
+    entry_price: float
+
+    current_price: float
+
+    return_pct: float
+
+    days_active: int
+
+    swing_rank_score: float
     
 class DashboardSummary(BaseModel):
     kpis: list[KPI]
@@ -65,6 +81,7 @@ class DashboardSummary(BaseModel):
     sector_leaders: list[dict]
 
     market_summary: str
+
 
 class GoldStock(BaseModel):
     symbol: str
@@ -102,19 +119,3 @@ class BacktestResult(BaseModel):
     
 class ExplosionBacktestRequest(BaseModel):
     days: int = 365
-
-class UltraBreakoutTrackerRow(BaseModel):
-
-    symbol: str
-
-    breakout_date: str
-
-    entry_price: float
-
-    current_price: float
-
-    return_pct: float
-
-    days_active: int
-
-    swing_rank_score: float
