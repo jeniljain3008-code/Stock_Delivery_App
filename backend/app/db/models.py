@@ -218,6 +218,24 @@ class UltraSignal(Base):
         nullable=False,
     )
 
+        # --------------------------------------------
+    # Strategy Metadata
+    # --------------------------------------------
+    
+    entry_method: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+    
+    strategy_name: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+    
+    exit_reason: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
     status_changed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
