@@ -3,20 +3,29 @@
 Trading Engine Models
 ==========================================================
 
-These models are INTERNAL to the Trading Engine.
+Everything inside Trading Engine revolves around ONE object.
 
-Database Models
-↓
+Trade
 
-Analytics
+Each engine updates the Trade.
 
-↓
-
-Trading Models
+Signal Engine
 
 ↓
 
-API Schemas
+Entry Engine
+
+↓
+
+Ranking Engine
+
+↓
+
+Trade Manager
+
+↓
+
+Statistics
 
 ==========================================================
 """
@@ -25,127 +34,89 @@ from dataclasses import dataclass
 from datetime import date
 
 
-# ---------------------------------------------------------
-# Ultra Signal
-# ---------------------------------------------------------
-
 @dataclass(slots=True)
-class TradeSignal:
+class Trade:
+
+    # -------------------------------------------------
+    # Identity
+    # -------------------------------------------------
 
     symbol: str
 
     signal_date: date
+
+    # -------------------------------------------------
+    # Prices
+    # -------------------------------------------------
 
     close: float
 
     high: float
 
-    delivery_percent: float
-
-    surge_5d: float
-
-    surge_10d: float
-
-    surge_30d: float
-
-    explosion_score: float
-
-    accumulation_score: float
-
-    breakout_score: float
-
-    swing_rank: float
-
-    swing_signal: str
-
-    risk_rating: str
-
-
-# ---------------------------------------------------------
-# Near Breakout
-# ---------------------------------------------------------
-
-@dataclass(slots=True)
-class NearBreakout:
-
-    symbol: str
-
     signal_high: float
 
-    current_close: float
+    entry_price: float = 0
 
-    distance_pct: float
+    current_price: float = 0
 
-    swing_rank: float
+    highest_close: float = 0
 
-    accumulation_score: float
+    exit_price: float = 0
 
-    breakout_score: float
+    # -------------------------------------------------
+    # Analytics
+    # -------------------------------------------------
 
+    delivery_percent: float = 0
 
-# ---------------------------------------------------------
-# Pilot Entry
-# ---------------------------------------------------------
+    surge_5d: float = 0
 
-@dataclass(slots=True)
-class PilotEntry:
+    surge_10d: float = 0
 
-    symbol: str
+    surge_30d: float = 0
 
-    entry_score: float
+    explosion_score: float = 0
 
-    suggested_allocation: float
+    accumulation_score: float = 0
 
-    signal_strength: str
+    breakout_score: float = 0
 
+    swing_rank: float = 0
 
-# ---------------------------------------------------------
-# Active Position
-# ---------------------------------------------------------
+    volume_ratio: float = 0
 
-@dataclass(slots=True)
-class TradePosition:
+    distance_to_breakout: float = 0
 
-    symbol: str
+    conviction_score: float = 0
 
-    signal_date: date
+    entry_score: float = 0
 
-    breakout_date: date
+    # -------------------------------------------------
+    # Position
+    # -------------------------------------------------
 
-    entry_price: float
+    allocation: float = 0
 
-    current_price: float
+    quantity: int = 0
 
-    highest_close: float
+    # -------------------------------------------------
+    # Performance
+    # -------------------------------------------------
 
-    return_pct: float
+    return_pct: float = 0
 
-    days_active: int
+    max_return_pct: float = 0
 
-    status: str
+    days_active: int = 0
 
+    # -------------------------------------------------
+    # Status
+    # -------------------------------------------------
 
-# ---------------------------------------------------------
-# Strategy Statistics
-# ---------------------------------------------------------
+    status: str = "SIGNAL"
 
-@dataclass(slots=True)
-class StrategyStatistics:
+    action: str = "WATCH"
 
-    total_signals: int
+    stars: str = "★"
 
-    total_breakouts: int
-
-    total_open_trades: int
-
-    total_closed_trades: int
-
-    win_rate: float
-
-    average_return: float
-
-    average_holding_days: float
-
-    best_trade: float
-
-    worst_trade: float
+    risk_rating: str = "LOW"
