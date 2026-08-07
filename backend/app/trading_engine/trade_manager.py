@@ -36,7 +36,7 @@ CLOSED
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 import pandas as pd
 
@@ -166,12 +166,21 @@ class TradeManager:
 
                 ).days
 
-            # Status
-
-            trade.entry_status = self.determine_status(
-                trade
-            )
-
+                        # --------------------------------------
+            # Update Trade Status
+            # --------------------------------------
+            
+            new_status = self.determine_status(trade)
+            
+            if trade.entry_status != new_status:
+            
+                trade.entry_status = new_status
+            
+                trade.status_changed_at = datetime.utcnow()
+            
+            # Always update last refresh timestamp
+            trade.last_updated_at = datetime.utcnow()
+            
             updated += 1
 
         self.db.commit()
