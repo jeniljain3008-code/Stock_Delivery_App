@@ -153,6 +153,59 @@ class UltraSignal(Base):
         default=False,
         nullable=False,
     )
+        # ----------------------------------------
+    # Trade Lifecycle
+    # ----------------------------------------
+    
+    entry_status: Mapped[str] = mapped_column(
+        String,
+        default="SIGNAL",
+        nullable=False,
+    )
+    
+    entry_price: Mapped[float | None] = mapped_column(
+        Numeric(14, 4),
+        nullable=True,
+    )
+    
+    current_price: Mapped[float | None] = mapped_column(
+        Numeric(14, 4),
+        nullable=True,
+    )
+    
+    highest_close: Mapped[float | None] = mapped_column(
+        Numeric(14, 4),
+        nullable=True,
+    )
+    
+    return_pct: Mapped[float | None] = mapped_column(
+        Numeric(8, 2),
+        nullable=True,
+    )
+    
+    max_return_pct: Mapped[float | None] = mapped_column(
+        Numeric(8, 2),
+        nullable=True,
+    )
+    
+    days_active: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
+    
+    exit_price: Mapped[float | None] = mapped_column(
+        Numeric(14, 4),
+        nullable=True,
+    )
+    
+    exit_date: Mapped[date | None] = mapped_column(
+        Date,
+        nullable=True,
+    )
+    
+    entry_score: Mapped[float | None] = mapped_column(
+        Numeric(8, 2),
+        nullable=True,
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
